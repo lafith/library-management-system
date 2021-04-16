@@ -1,5 +1,6 @@
-from flask import render_template
+from flask import render_template, request
 from app import lbms_app
+from app.forms import RegisterForm
 
 
 # This route is for showing 'Home' page
@@ -15,3 +16,10 @@ def index():
 def about():
     """View function for About Us page"""
     return render_template('about.html')
+
+
+@lbms_app.route('/register', methods=['GET', 'POST'])
+def register():
+    """View function for Registration page"""
+    form = RegisterForm(request.form)
+    return render_template('register.html', form=form)
