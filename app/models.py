@@ -11,8 +11,7 @@ class Library(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    
+
     def __init__(self, name, email, password):
         self.name = name
         self.email = email

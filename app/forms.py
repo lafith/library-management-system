@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators
+from app.models import Library
 
 
 class RegisterForm(FlaskForm):
@@ -12,3 +13,17 @@ class RegisterForm(FlaskForm):
         validators.EqualTo('confirm', message='Passwords do not match')
     ])
     confirm = PasswordField('Confirm Password')
+
+    def validate_name(self, name):
+        library = Library.query.filter_by(name=name.data).first()
+        if library:
+            raise validators.ValidationError(
+                'That name is taken. Please choose a different one.'
+                )
+
+    def validate_email(self, email):
+        library = Library.query.filter_by(email=email.data).first()
+        if library:
+            raise validators.ValidationError(
+                'That email is taken. Please choose a different one.'
+                )
