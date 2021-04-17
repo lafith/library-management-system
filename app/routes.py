@@ -13,7 +13,6 @@ def index():
     return render_template('home.html')
 
 
-# This route is for showing 'About Us' type information
 @lbms_app.route('/about')
 def about():
     """View function for About Us page"""
