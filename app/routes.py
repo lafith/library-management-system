@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
 from app.models import Library
@@ -40,4 +40,23 @@ def register():
 @lbms_app.route('/login', methods=['GET', 'POST'])
 def login():
     """View function for login page"""
+    if request.method == 'POST':
+        # Get Form Fields
+        email = request.form['email']
+        # Search database for the entered email
+        l=Library.query.filter_by(email=email).first()
+        if l:
+            # Checking password
+            password_candidate = request.form['password']
+            if bcrypt.check_password_hash(l.password,password_candidate):
+                session['logged_in'] = True
+                session['email'] = email
+                flash(f'You have been logged in!','success')
+                return redirect(url_for('index'))
+            else:
+                error = 'Invalid login'
+                return render_template('login.html', error=error)
+        else:
+            error = 'Email not found'
+            return render_template('login.html', error=error)
     return render_template('login.html')
