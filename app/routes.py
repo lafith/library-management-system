@@ -3,7 +3,7 @@ from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
 from app.models import Library
 from app.forms import RegisterForm
-
+from functools import wraps
 
 # This route is for showing 'Home' page
 @lbms_app.route('/')
@@ -62,7 +62,20 @@ def login():
     return render_template('login.html')
 
 
+def is_logged_in(f):
+    """This function will check if user is logged in"""
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
+
 @lbms_app.route('/logout')
+@is_logged_in
 def logout():
     """view function for logout tab"""
     session.clear()
@@ -71,6 +84,7 @@ def logout():
 
 
 @lbms_app.route('/dashboard')
+@is_logged_in
 def dashboard():
     """view function for dashboard page of each library"""
     return render_template('dashboard.html')
