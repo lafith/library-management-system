@@ -24,28 +24,79 @@
             <th>Action</th>
           </tr>
 
+          {% for row in users%}
           <tr>
-            <td>01</td>
-            <td>dummy_name</td>
-            <td>dummy@gmail.com</td>
-            <td>987654</td>
+            <td>{{row.id}}</td>
+            <td>{{row.name}}</td>
+            <td>{{row.email}}</td>
+            <td>{{row.phone}}</td>
             <td>
               <a
-                href="/update/01"
+                href=""
                 class="btn btn-warning btn-xs"
                 data-toggle="modal"
-                data-target="#updatemodal01"
+                data-target="#updatemodal{{row.id}}"
                 >Update</a
               >
               <a
-                href="/delete/01"
+                href=""
                 class="btn btn-danger btn-xs"
                 onclick="return confirm('Confirm Delete?')"
                 >Delete</a
               >
             </td>
           </tr>
+          {%endfor%}
         </table>
+      </div>
+      <!--Modal for adding user-->
+      <div id="mymodal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Add User</h4>
+            </div>
+            <div class="modal-body">
+              <form action="{{url_for('add_user')}}" method="POST">
+                <div class="form-group">
+                  <label>Name:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Email:</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    name="email"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Phone:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="phone"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Add</button>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

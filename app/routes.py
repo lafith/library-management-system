@@ -94,5 +94,21 @@ def dashboard():
 @is_logged_in
 def users():
     """View function for user management page"""
-    all_users=User.query.all()
+    l = Library.query.filter_by(email=session['email']).first()
+    all_users = User.query.filter_by(library=l)
     return render_template('users.html', users=all_users)
+
+
+@lbms_app.route('/add_user', methods=['GET', 'POST'])
+@is_logged_in
+def add_user():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        phone = request.form['phone']
+        l = Library.query.filter_by(email=session['email']).first()
+        user = User(name=name, email=email, phone=phone, library=l)
+        db.session.add(user)
+        db.session.commit()
+        flash("New user is added","success")
+        return redirect(url_for('users'))
