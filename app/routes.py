@@ -62,6 +62,14 @@ def login():
     return render_template('login.html')
 
 
+@lbms_app.route('/logout')
+def logout():
+    """view function for logout tab"""
+    session.clear()
+    flash('You are now logged out', 'success')
+    return redirect(url_for('login'))
+
+
 @lbms_app.route('/dashboard')
 def dashboard():
     """view function for dashboard page of each library"""
