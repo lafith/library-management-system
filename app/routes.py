@@ -129,3 +129,13 @@ def update():
         flash("User Information Updated Successfully")
  
         return redirect(url_for('users'))
+
+
+@lbms_app.route('/delete/<id>/', methods = ['GET', 'POST'])
+def delete(id):
+    """View function to remove entries from User table"""
+    user = User.query.get(id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("User Deleted Successfully")
+    return redirect(url_for('users'))
