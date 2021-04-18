@@ -1,7 +1,7 @@
 from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
-from app.models import Library
+from app.models import Library, User
 from app.forms import RegisterForm
 from functools import wraps
 
@@ -94,4 +94,5 @@ def dashboard():
 @is_logged_in
 def users():
     """View function for user management page"""
-    return render_template('users.html')
+    all_users=User.query.all()
+    return render_template('users.html', users=all_users)
