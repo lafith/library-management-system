@@ -52,7 +52,7 @@ def login():
                 session['logged_in'] = True
                 session['email'] = email
                 flash(f'You have been logged in!','success')
-                return redirect(url_for('index'))
+                return redirect(url_for('dashboard'))
             else:
                 error = 'Invalid login'
                 return render_template('login.html', error=error)
@@ -60,3 +60,9 @@ def login():
             error = 'Email not found'
             return render_template('login.html', error=error)
     return render_template('login.html')
+
+
+@lbms_app.route('/dashboard')
+def dashboard():
+    """view function for dashboard page of each library"""
+    return render_template('dashboard.html')
