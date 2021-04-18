@@ -35,3 +35,9 @@ def register():
         flash('You are now registered and can log in', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
+
+
+@lbms_app.route('/login', methods=['GET', 'POST'])
+def login():
+    """View function for login page"""
+    return render_template('login.html')
