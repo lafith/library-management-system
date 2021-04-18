@@ -1,0 +1,53 @@
+{% extends "layout.html" %} {% block title %}Users{% endblock %}{% block content
+%}
+<div class="container">
+  <div class="row">
+    <div class="col md-12">
+      <div class="jumbotron p-3">
+        <h2>
+          Manage <b>Users</b>
+          <button
+            type="button"
+            class="btn btn-success float-right"
+            data-toggle="modal"
+            data-target="#mymodal"
+          >
+            Add New User
+          </button>
+        </h2>
+        <table class="table table-hover table-dark">
+          <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Action</th>
+          </tr>
+          <tr>
+            <td>01</td>
+            <td>dummy_name</td>
+            <td>dummy@gmail.com</td>
+            <td>987654</td>
+            <td>
+              <a
+                href="/update/01"
+                class="btn btn-warning btn-xs"
+                data-toggle="modal"
+                data-target="#updatemodal01"
+                >Update</a
+              >
+              <a
+                href="/delete/01"
+                class="btn btn-danger btn-xs"
+                onclick="return confirm('Confirm Delete?')"
+                >Delete</a
+              >
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

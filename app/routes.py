@@ -88,3 +88,10 @@ def logout():
 def dashboard():
     """view function for dashboard page of each library"""
     return render_template('dashboard.html')
+
+
+@lbms_app.route('/users')
+@is_logged_in
+def users():
+    """View function for user management page"""
+    return render_template('users.html')
