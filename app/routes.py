@@ -5,7 +5,7 @@ from app.models import Library, User
 from app.forms import RegisterForm
 from functools import wraps
 
-# This route is for showing 'Home' page
+
 @lbms_app.route('/')
 @lbms_app.route('/index')
 def index():
@@ -102,6 +102,7 @@ def users():
 @lbms_app.route('/add_user', methods=['GET', 'POST'])
 @is_logged_in
 def add_user():
+    """View function to add user into database"""
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
@@ -111,4 +112,20 @@ def add_user():
         db.session.add(user)
         db.session.commit()
         flash("New user is added","success")
+        return redirect(url_for('users'))
+
+@lbms_app.route('/update', methods = ['GET', 'POST'])
+@is_logged_in
+def update():
+    """View function for updating user info"""
+    if request.method == 'POST':
+        user = User.query.get(request.form.get('id'))
+ 
+        user.name = request.form['name']
+        user.email = request.form['email']
+        user.phone = request.form['phone']
+ 
+        db.session.commit()
+        flash("User Information Updated Successfully")
+ 
         return redirect(url_for('users'))

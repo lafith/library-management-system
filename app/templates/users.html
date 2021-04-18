@@ -32,7 +32,7 @@
             <td>{{row.phone}}</td>
             <td>
               <a
-                href=""
+                href="/update/{{row.id}}"
                 class="btn btn-warning btn-xs"
                 data-toggle="modal"
                 data-target="#updatemodal{{row.id}}"
@@ -46,6 +46,58 @@
               >
             </td>
           </tr>
+          <!--Modal for Updating-->
+          <div id="updatemodal{{row.id}}" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">Update Information</h4>
+                </div>
+                <div class="modal-body">
+                  <form action="{{url_for('update')}}" method="POST">
+                    <div class="form-group">
+                      <label>Name:</label>
+                      <input type="hidden" name="id" value="{{row.id}}" />
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="name"
+                        value="{{row.name}}"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Email:</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        name="email"
+                        value="{{row.email}}"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Phone:</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        name="phone"
+                        value="{{row.phone}}"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <button class="btn btn-primary" type="submit">
+                        Submit
+                      </button>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
           {%endfor%}
         </table>
       </div>

@@ -1,5 +1,9 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  {% if session.logged_in %}
+  <a class="navbar-brand" href="{{url_for('dashboard')}}">Dashboard</a>
+  {%else%}
   <a class="navbar-brand" href="/">Home</a>
+  {%endif%}
   <button
     class="navbar-toggler"
     type="button"
