@@ -2,7 +2,7 @@ from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
 from app.models import Library, User
-from app.forms import RegisterForm
+from app.forms import RegisterForm, BookForm
 from functools import wraps
 
 
@@ -139,3 +139,16 @@ def delete(id):
     db.session.commit()
     flash("User Deleted Successfully")
     return redirect(url_for('users'))
+
+@lbms_app.route('/books')
+@is_logged_in
+def books():
+    """View function for user management page"""
+    return render_template('books.html')
+
+@lbms_app.route('/add_book', methods=['GET', 'POST'])
+@is_logged_in
+def add_book():
+    """View function to add user into database"""
+    form=BookForm(request.form)
+    return redirect(url_for('users'),form=form)

@@ -26,20 +26,20 @@
 
           {% for row in users%}
           <tr>
-            <td>{{row.id}}</td>
+            <td>{{row.user_id}}</td>
             <td>{{row.name}}</td>
             <td>{{row.email}}</td>
             <td>{{row.phone}}</td>
             <td>
               <a
-                href="/update/{{row.id}}"
+                href="/update/{{row.user_id}}"
                 class="btn btn-warning btn-xs"
                 data-toggle="modal"
-                data-target="#updatemodal{{row.id}}"
+                data-target="#updatemodal{{row.user_id}}"
                 >Update</a
               >
               <a
-                href="/delete/{{row.id}}"
+                href="/delete/{{row.user_id}}"
                 class="btn btn-danger btn-xs"
                 onclick="return confirm('Confirm Delete?')"
                 >Delete</a
@@ -47,7 +47,7 @@
             </td>
           </tr>
           <!--Modal for Updating-->
-          <div id="updatemodal{{row.id}}" class="modal fade" role="dialog">
+          <div id="updatemodal{{row.user_id}}" class="modal fade" role="dialog">
             <div class="modal-dialog">
               <div class="modal-content">
                 <div class="modal-header">
@@ -57,7 +57,7 @@
                   <form action="{{url_for('update')}}" method="POST">
                     <div class="form-group">
                       <label>Name:</label>
-                      <input type="hidden" name="id" value="{{row.id}}" />
+                      <input type="hidden" name="id" value="{{row.user_id}}" />
                       <input
                         type="text"
                         class="form-control"
