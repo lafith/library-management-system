@@ -44,14 +44,16 @@ def login():
         # Get Form Fields
         email = request.form['email']
         # Search database for the entered email
-        l=Library.query.filter_by(email=email).first()
-        if l:
+        library = Library.query.filter_by(email=email).first()
+        if library:
             # Checking password
             password_candidate = request.form['password']
-            if bcrypt.check_password_hash(l.password,password_candidate):
+            if bcrypt.check_password_hash(
+                    library.password,
+                    password_candidate):
                 session['logged_in'] = True
                 session['email'] = email
-                flash(f'You have been logged in!','success')
+                flash('You have been logged in!', 'success')
                 return redirect(url_for('dashboard'))
             else:
                 error = 'Invalid login'
@@ -94,8 +96,8 @@ def dashboard():
 @is_logged_in
 def users():
     """View function for user management page"""
-    l = Library.query.filter_by(email=session['email']).first()
-    all_users = User.query.filter_by(library=l)
+    library = Library.query.filter_by(email=session['email']).first()
+    all_users = User.query.filter_by(library=library)
     return render_template('users.html', users=all_users)
 
 
@@ -107,31 +109,31 @@ def add_user():
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
-        l = Library.query.filter_by(email=session['email']).first()
-        user = User(name=name, email=email, phone=phone, library=l)
+        library = Library.query.filter_by(email=session['email']).first()
+        user = User(name=name, email=email, phone=phone, library=library)
         db.session.add(user)
         db.session.commit()
-        flash("New user is added","success")
+        flash("New user is added", "success")
         return redirect(url_for('users'))
 
-@lbms_app.route('/update', methods = ['GET', 'POST'])
+
+@lbms_app.route('/update', methods=['GET', 'POST'])
 @is_logged_in
 def update():
     """View function for updating user info"""
     if request.method == 'POST':
         user = User.query.get(request.form.get('id'))
- 
         user.name = request.form['name']
         user.email = request.form['email']
         user.phone = request.form['phone']
- 
+
         db.session.commit()
         flash("User Information Updated Successfully")
- 
+
         return redirect(url_for('users'))
 
 
-@lbms_app.route('/delete/<id>/', methods = ['GET', 'POST'])
+@lbms_app.route('/delete/<id>/', methods=['GET', 'POST'])
 def delete(id):
     """View function to remove entries from User table"""
     user = User.query.get(id)
@@ -140,15 +142,17 @@ def delete(id):
     flash("User Deleted Successfully")
     return redirect(url_for('users'))
 
+
 @lbms_app.route('/books')
 @is_logged_in
 def books():
     """View function for user management page"""
     return render_template('books.html')
 
+
 @lbms_app.route('/add_book', methods=['GET', 'POST'])
 @is_logged_in
 def add_book():
     """View function to add user into database"""
-    form=BookForm(request.form)
-    return redirect(url_for('users'),form=form)
+    form = BookForm(request.form)
+    return redirect(url_for('users'), form=form)

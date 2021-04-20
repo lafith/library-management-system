@@ -28,7 +28,7 @@ class RegisterForm(FlaskForm):
                 'That email is taken. Please choose a different one.'
                 )
 
+
 class BookForm(FlaskForm):
     title = StringField('Title', [validators.Length(min=1, max=100)])
     isbn = StringField('ISBN', [validators.Length(min=1, max=20)])
-    
