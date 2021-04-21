@@ -173,3 +173,12 @@ def update_book():
         flash("Book Information Updated Successfully")
 
         return redirect(url_for('books'))
+
+@lbms_app.route('/delete_book/<id>/', methods=['GET', 'POST'])
+def delete_book(id):
+    """View function to remove entries from User table"""
+    book = Book.query.get(id)
+    db.session.delete(book)
+    db.session.commit()
+    flash("Book info Deleted Successfully")
+    return redirect(url_for('books'))
