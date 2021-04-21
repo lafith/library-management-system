@@ -47,7 +47,8 @@ class Book(db.Model):
     """
     book_id = db.Column(db.Integer, primary_key=True)
     tite = db.Column(db.String(20), nullable=False)
-    isbn = db.Column(db.String(120), unique=True, nullable=False)
+    isbn = db.Column(db.String(15), unique=True, nullable=False)
+    author = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
         return f"Book('{self.title}', '{self.isbn}')"

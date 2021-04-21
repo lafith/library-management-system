@@ -1,13 +1,17 @@
 {% extends "layout.html" %} {% block title %}Register{% endblock %}{% block
 content %}
-<form action="" method="post">
-  {% from "includes/_formhelpers.html" import render_field %} {{
-  form.hidden_tag() }}
-  <fieldset class="form-group">
-    <legend class="border-bottom mb-4">Register</legend>
-    {{render_field(form.name)}} {{render_field(form.email)}}
-    {{render_field(form.password)}} {{render_field(form.confirm)}}
-  </fieldset>
-  <p><input type="submit" class="btn btn-outline-info" value="Submit" /></p>
-</form>
+<div class="row justify-content-center align-items-center h-100">
+  <div class="col col-sm-6 col-md-6 col-lg-4 col-xl-3">
+    <form action="" method="post">
+      {% from "includes/_formhelpers.html" import render_field %} {{
+      form.hidden_tag() }}
+      <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Register</legend>
+        {{render_field(form.name)}} {{render_field(form.email)}}
+        {{render_field(form.password)}} {{render_field(form.confirm)}}
+      </fieldset>
+      <p><input type="submit" class="btn btn-outline-info" value="Submit" /></p>
+    </form>
+  </div>
+</div>
 {% endblock %}

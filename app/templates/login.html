@@ -1,27 +1,16 @@
 {% extends "layout.html" %} {% block title %}Login{% endblock %}{% block content
 %}
-<form action="" method="POST">
-  <fieldset class="form-group">
-    <legend class="border-bottom mb-4">LogIn</legend>
-    <div class="form-group">
-      <label>Email</label>
-      <input
-        type="text"
-        name="email"
-        class="form-control"
-        value="{{request.form.email}}"
-      />
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input
-        type="password"
-        name="password"
-        class="form-control"
-        value="{{request.form.password}}"
-      />
-    </div>
-  </fieldset>
-  <button type="submit" class="btn btn-info">Submit</button>
-</form>
+<div class="row justify-content-center align-items-center h-100">
+  <div class="col col-sm-6 col-md-6 col-lg-4 col-xl-3">
+    <form action="" method="post">
+      {% from "includes/_formhelpers.html" import render_field %} {{
+      form.hidden_tag() }}
+      <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Login</legend>
+        {{render_field(form.email)}}{{render_field(form.password)}}
+      </fieldset>
+      <p><input type="submit" class="btn btn-outline-info" value="Submit" /></p>
+    </form>
+  </div>
+</div>
 {% endblock %}

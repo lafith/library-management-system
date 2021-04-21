@@ -2,7 +2,7 @@ from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
 from app.models import Library, User
-from app.forms import RegisterForm, BookForm
+from app.forms import RegisterForm, LoginForm
 from functools import wraps
 
 
@@ -40,28 +40,14 @@ def register():
 @lbms_app.route('/login', methods=['GET', 'POST'])
 def login():
     """View function for login page"""
-    if request.method == 'POST':
-        # Get Form Fields
-        email = request.form['email']
-        # Search database for the entered email
-        library = Library.query.filter_by(email=email).first()
-        if library:
-            # Checking password
-            password_candidate = request.form['password']
-            if bcrypt.check_password_hash(
-                    library.password,
-                    password_candidate):
-                session['logged_in'] = True
-                session['email'] = email
-                flash('You have been logged in!', 'success')
-                return redirect(url_for('dashboard'))
-            else:
-                error = 'Invalid login'
-                return render_template('login.html', error=error)
-        else:
-            error = 'Email not found'
-            return render_template('login.html', error=error)
-    return render_template('login.html')
+    form=LoginForm(request.form)
+    if request.method == 'POST' and form.validate():
+        email = form.email.data
+        session['logged_in'] = True
+        session['email'] = email
+        flash('You have been logged in!', 'success')
+        return redirect(url_for('dashboard'))
+    return render_template('login.html',form=form)
 
 
 def is_logged_in(f):
@@ -142,17 +128,8 @@ def delete(id):
     flash("User Deleted Successfully")
     return redirect(url_for('users'))
 
-
 @lbms_app.route('/books')
 @is_logged_in
 def books():
     """View function for user management page"""
     return render_template('books.html')
-
-
-@lbms_app.route('/add_book', methods=['GET', 'POST'])
-@is_logged_in
-def add_book():
-    """View function to add user into database"""
-    form = BookForm(request.form)
-    return redirect(url_for('users'), form=form)
