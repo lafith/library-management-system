@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, validators
+from wtforms import StringField, PasswordField, SelectField, validators
 from app import bcrypt
 from app.models import Library
 from email_validator import validate_email, EmailNotValidError
@@ -24,9 +24,10 @@ class RegisterForm(FlaskForm):
                 )
 
     def validate_email(self, email):
+        email = email.data
         try:
             # Validate.
-            valid = validate_email(email.data)
+            valid = validate_email(email)
 
             # Update with the normalized form.
             email = valid.email
@@ -34,7 +35,7 @@ class RegisterForm(FlaskForm):
             # email is not valid, exception message is human-readable
             raise validators.ValidationError(str(e))
 
-        library = Library.query.filter_by(email=email.data).first()
+        library = Library.query.filter_by(email=email).first()
         if library:
             raise validators.ValidationError(
                 'That email is taken. Please choose a different one.'

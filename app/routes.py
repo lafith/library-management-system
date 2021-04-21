@@ -1,7 +1,7 @@
 from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
-from app.models import Library, User
+from app.models import Library, User, Book
 from app.forms import RegisterForm, LoginForm
 from functools import wraps
 
@@ -24,6 +24,7 @@ def register():
     """View function for Registration page"""
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
+        print(form.email)
         name = form.name.data
         email = form.email.data
         password = bcrypt.generate_password_hash(
@@ -128,8 +129,30 @@ def delete(id):
     flash("User Deleted Successfully")
     return redirect(url_for('users'))
 
-@lbms_app.route('/books')
+@lbms_app.route('/books', methods=['GET', 'POST'])
 @is_logged_in
 def books():
     """View function for user management page"""
-    return render_template('books.html')
+    library = Library.query.filter_by(email=session['email']).first()
+    all_books = Book.query.filter_by(library=library)
+    return render_template('books.html', books=all_books)
+
+@lbms_app.route('/add_book', methods=['GET', 'POST'])
+@is_logged_in
+def add_book():
+    """View function to add user into database"""
+    if request.method == 'POST':
+        title = request.form['title']
+        isbn = request.form['isbn']
+        genre = request.form['genre']
+        author = request.form['author']
+        shelf = request.form['shelf']
+        library = Library.query.filter_by(email=session['email']).first()
+        book=Book(
+            title=title,isbn=isbn,
+            genre=genre,author=author,
+            shelf=shelf,library=library)
+        db.session.add(book)
+        db.session.commit()
+        flash("New book is added", "success")
+        return redirect(url_for('books'))

@@ -1,12 +1,6 @@
 from app import db
 from datetime import datetime
 
-books_joint = db.Table(
-    'books_joint',
-    db.Column('library_id', db.Integer, db.ForeignKey('library.library_id')),
-    db.Column('book_id', db.Integer, db.ForeignKey('book.book_id')),
-    )
-
 
 class Library(db.Model):
     """This class defines the table
@@ -18,9 +12,7 @@ class Library(db.Model):
     password = db.Column(db.String(60), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
     users = db.relationship('User', backref='library', lazy=True)
-    books = db.relationship(
-        'Book', secondary=books_joint,
-        backref=db.backref('libraries', lazy='dynamic'))
+    books = db.relationship('Book', backref='library', lazy=True)
 
     def __repr__(self):
         return f"Library('{self.name}', '{self.email}')"
@@ -46,9 +38,12 @@ class Book(db.Model):
     for storing info regarding books
     """
     book_id = db.Column(db.Integer, primary_key=True)
-    tite = db.Column(db.String(20), nullable=False)
+    title = db.Column(db.String(20), nullable=False)
     isbn = db.Column(db.String(15), unique=True, nullable=False)
+    genre = db.Column(db.String(100), nullable=False)
     author = db.Column(db.String(100), nullable=False)
-
+    shelf = db.Column(db.Float, nullable=False)
+    status = db.Column(db.Boolean, nullable=False,default=True)
+    library_id = db.Column(db.Integer, db.ForeignKey('library.library_id'))
     def __repr__(self):
         return f"Book('{self.title}', '{self.isbn}')"
