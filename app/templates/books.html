@@ -43,7 +43,7 @@
               href="/update/{{row.book_id}}"
               class="btn btn-warning btn-xs"
               data-toggle="modal"
-              data-target="#updatemodal{{row.book_id}}"
+              data-target="#updatebookmodal{{row.book_id}}"
               >Update</a
             >
             <a
@@ -54,7 +54,87 @@
             >
           </td>
         </tr>
-
+        <div
+          id="updatebookmodal{{row.book_id}}"
+          class="modal fade"
+          role="dialog"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Update Information</h4>
+              </div>
+              <div class="modal-body">
+                <form action="{{url_for('update_book')}}" method="POST">
+                  <div class="form-group">
+                    <label>Title:</label>
+                    <input type="hidden" name="id" value="{{row.book_id}}" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="title"
+                      value="{{row.title}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>ISBN:</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="isbn"
+                      value="{{row.isbn}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label for="genreselect">Genre</label>
+                    <select
+                      class="form-control"
+                      id="genreselect"
+                      name="genre"
+                      value="{{row.genre}}"
+                    >
+                      <option value="none" selected disabled hidden>
+                        Select an Option
+                      </option>
+                      <option>Classics</option>
+                      <option>Sci-Fi</option>
+                      <option>Biography</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Author:</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="author"
+                      value="{{row.author}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Shelf No:</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="shelf"
+                      step="any"
+                      value="{{row.shelf}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn-primary" type="submit">
+                      Submit
+                    </button>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">
+                      Close
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
         {%endfor%}
       </table>
     </div>
@@ -88,6 +168,9 @@
               <div class="form-group">
                 <label for="genreselect">Genre</label>
                 <select class="form-control" id="genreselect" name="genre">
+                  <option value="none" selected disabled hidden>
+                    Select an Option
+                  </option>
                   <option>Classics</option>
                   <option>Sci-Fi</option>
                   <option>Biography</option>

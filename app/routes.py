@@ -156,3 +156,20 @@ def add_book():
         db.session.commit()
         flash("New book is added", "success")
         return redirect(url_for('books'))
+
+@lbms_app.route('/update_book', methods=['GET', 'POST'])
+@is_logged_in
+def update_book():
+    """View function for updating user info"""
+    if request.method == 'POST':
+        book = Book.query.get(request.form.get('id'))
+        book.title = request.form['title']
+        book.isbn = request.form['isbn']
+        book.genre = request.form['genre']
+        book.author = request.form['author']
+        book.shelf = request.form['shelf']
+
+        db.session.commit()
+        flash("Book Information Updated Successfully")
+
+        return redirect(url_for('books'))
