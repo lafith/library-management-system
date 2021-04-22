@@ -1,7 +1,7 @@
 from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
-from app.models import Library, Member, Book
+from app.models import Library, Member, Book, Author
 from app.forms import RegisterForm, LoginForm
 from functools import wraps
 
@@ -144,19 +144,27 @@ def books():
 def add_book():
     """View function to add Member into database"""
     if request.method == 'POST':
-        authors = request.form.getlist("author[]")
-        print(authors)
         title = request.form['title']
         isbn = request.form['isbn']
+        total = request.form['total']
+        authors = request.form.getlist("author[]")
         library = Library.query.filter_by(email=session['email']).first()
-        '''
-        book=Book(
-            title=title,isbn=isbn,
-            genre=genre,author=author,
-            shelf=shelf,library=library)
+        book = Book(
+            title=title, isbn=isbn,
+            total=total, available=total,
+            library=library)
+        for name_ in authors:
+            author = Author.query.filter_by(name=name_).first()
+            if author:
+                book.authors.append(author)
+            else:
+                author = Author(name=name_)
+                db.session.add(author)
+                book.authors.append(author)
+
         db.session.add(book)
         db.session.commit()
-        '''
+
         flash("New book is added", "success")
         return redirect(url_for('books'))
 
@@ -169,12 +177,16 @@ def update_book():
         book = Book.query.get(request.form.get('id'))
         book.title = request.form['title']
         book.isbn = request.form['isbn']
-        book.author = request.form['author']
-        book.shelf = request.form['shelf']
+        diff = book.total - int(request.form['total'])
+        book.total = request.form['total']
+        book.available = book.available + diff
+
+        updated_authors = request.form.getlist('author[]')
+        for i in range(len(book.authors)):
+            book.authors[i].name = updated_authors[i]
 
         db.session.commit()
         flash("Book Information Updated Successfully")
-
         return redirect(url_for('books'))
 
 
