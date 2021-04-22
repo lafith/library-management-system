@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, validators
+from wtforms import StringField, PasswordField, validators
 from app import bcrypt
 from app.models import Library
 from email_validator import validate_email, EmailNotValidError
@@ -41,30 +41,27 @@ class RegisterForm(FlaskForm):
                 'That email is taken. Please choose a different one.'
                 )
 
+
 class LoginForm(FlaskForm):
     """This class defines the web form
     for the registration page"""
     email = StringField('Email', [validators.Length(min=6, max=50)])
     password = PasswordField('Password', [validators.DataRequired()])
 
-
     def validate_email(self, email):
         email = email.data
         try:
-            # Validate.
+            # Validate
             valid = validate_email(email)
-
             # Update with the normalized form.
             email = valid.email
         except EmailNotValidError as e:
-            # email is not valid, exception message is human-readable
             raise validators.ValidationError(str(e))
-        
         # Search database for the entered email
         library = Library.query.filter_by(email=email).first()
         if not library:
             raise validators.ValidationError('Email not found')
-    
+
     def validate_password(self, password):
         email = self.email.data
         library = Library.query.filter_by(email=email).first()

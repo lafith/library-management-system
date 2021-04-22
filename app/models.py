@@ -42,8 +42,9 @@ class Book(db.Model):
     isbn = db.Column(db.String(15), unique=True, nullable=False)
     author = db.Column(db.String(100), nullable=False)
     shelf = db.Column(db.Float, nullable=False)
-    quantity=db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Integer, nullable=False)
     library_id = db.Column(db.Integer, db.ForeignKey('library.library_id'))
+
     def __repr__(self):
         return f"Book('{self.title}', '{self.isbn}')"

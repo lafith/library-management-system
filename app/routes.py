@@ -41,14 +41,14 @@ def register():
 @lbms_app.route('/login', methods=['GET', 'POST'])
 def login():
     """View function for login page"""
-    form=LoginForm(request.form)
+    form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         email = form.email.data
         session['logged_in'] = True
         session['email'] = email
         flash('You have been logged in!', 'success')
         return redirect(url_for('dashboard'))
-    return render_template('login.html',form=form)
+    return render_template('login.html', form=form)
 
 
 def is_logged_in(f):
@@ -129,6 +129,7 @@ def delete_member(id):
     flash("Member Deleted Successfully")
     return redirect(url_for('members'))
 
+
 @lbms_app.route('/books', methods=['GET', 'POST'])
 @is_logged_in
 def books():
@@ -137,12 +138,13 @@ def books():
     all_books = Book.query.filter_by(library=library)
     return render_template('books.html', books=all_books)
 
+
 @lbms_app.route('/add_book', methods=['GET', 'POST'])
 @is_logged_in
 def add_book():
     """View function to add Member into database"""
     if request.method == 'POST':
-        authors=request.form.getlist("author[]")
+        authors = request.form.getlist("author[]")
         print(authors)
         title = request.form['title']
         isbn = request.form['isbn']
@@ -157,6 +159,7 @@ def add_book():
         '''
         flash("New book is added", "success")
         return redirect(url_for('books'))
+
 
 @lbms_app.route('/update_book', methods=['GET', 'POST'])
 @is_logged_in
@@ -173,6 +176,7 @@ def update_book():
         flash("Book Information Updated Successfully")
 
         return redirect(url_for('books'))
+
 
 @lbms_app.route('/delete_book/<id>/', methods=['GET', 'POST'])
 def delete_book(id):
