@@ -32,14 +32,14 @@ content %}
             <td>{{row.phone}}</td>
             <td>
               <a
-                href="/update/{{row.member_id}}"
+                href="/update_member/{{row.member_id}}"
                 class="btn btn-warning btn-xs"
                 data-toggle="modal"
                 data-target="#updatemodal{{row.member_id}}"
                 >Update</a
               >
               <a
-                href="/delete/{{row.member_id}}"
+                href="/delete_member/{{row.member_id}}"
                 class="btn btn-danger btn-xs"
                 onclick="return confirm('Confirm Delete?')"
                 >Delete</a
@@ -58,7 +58,7 @@ content %}
                   <h4 class="modal-title">Update Information</h4>
                 </div>
                 <div class="modal-body">
-                  <form action="{{url_for('update')}}" method="POST">
+                  <form action="{{url_for('update_member')}}" method="POST">
                     <div class="form-group">
                       <label>Name:</label>
                       <input

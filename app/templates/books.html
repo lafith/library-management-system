@@ -19,7 +19,6 @@
           <th>ID</th>
           <th>Title</th>
           <th>ISBN</th>
-          <th>Genre</th>
           <th>Author</th>
           <th>Shelf No.</th>
           <th>Status</th>
@@ -30,7 +29,6 @@
           <td>{{row.book_id}}</td>
           <td>{{row.title}}</td>
           <td>{{row.isbn}}</td>
-          <td>{{row.genre}}</td>
           <td>{{row.author}}</td>
           <td>{{row.shelf}}</td>
           {% if row.status %}
@@ -84,22 +82,6 @@
                       name="isbn"
                       value="{{row.isbn}}"
                     />
-                  </div>
-                  <div class="form-group">
-                    <label for="genreselect">Genre</label>
-                    <select
-                      class="form-control"
-                      id="genreselect"
-                      name="genre"
-                      value="{{row.genre}}"
-                    >
-                      <option value="none" selected disabled hidden>
-                        Select an Option
-                      </option>
-                      <option>Classics</option>
-                      <option>Sci-Fi</option>
-                      <option>Biography</option>
-                    </select>
                   </div>
                   <div class="form-group">
                     <label>Author:</label>
@@ -164,17 +146,6 @@
                   name="isbn"
                   required="1"
                 />
-              </div>
-              <div class="form-group">
-                <label for="genreselect">Genre</label>
-                <select class="form-control" id="genreselect" name="genre">
-                  <option value="none" selected disabled hidden>
-                    Select an Option
-                  </option>
-                  <option>Classics</option>
-                  <option>Sci-Fi</option>
-                  <option>Biography</option>
-                </select>
               </div>
               <div class="form-group">
                 <label>Author:</label>

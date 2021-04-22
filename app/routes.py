@@ -88,31 +88,31 @@ def members():
     return render_template('members.html', members=all_members)
 
 
-@lbms_app.route('/add_Member', methods=['GET', 'POST'])
+@lbms_app.route('/add_member', methods=['GET', 'POST'])
 @is_logged_in
-def add_Member():
+def add_member():
     """View function to add Member into database"""
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
         library = Library.query.filter_by(email=session['email']).first()
-        Member = Member(name=name, email=email, phone=phone, library=library)
-        db.session.add(Member)
+        member = Member(name=name, email=email, phone=phone, library=library)
+        db.session.add(member)
         db.session.commit()
         flash("New Member is added", "success")
         return redirect(url_for('members'))
 
 
-@lbms_app.route('/update', methods=['GET', 'POST'])
+@lbms_app.route('/update_member', methods=['GET', 'POST'])
 @is_logged_in
-def update():
+def update_member():
     """View function for updating Member info"""
     if request.method == 'POST':
-        Member = Member.query.get(request.form.get('id'))
-        Member.name = request.form['name']
-        Member.email = request.form['email']
-        Member.phone = request.form['phone']
+        member = Member.query.get(request.form.get('id'))
+        member.name = request.form['name']
+        member.email = request.form['email']
+        member.phone = request.form['phone']
 
         db.session.commit()
         flash("Member Information Updated Successfully")
@@ -120,11 +120,11 @@ def update():
         return redirect(url_for('members'))
 
 
-@lbms_app.route('/delete/<id>/', methods=['GET', 'POST'])
-def delete(id):
+@lbms_app.route('/delete_member/<id>/', methods=['GET', 'POST'])
+def delete_member(id):
     """View function to remove entries from Member table"""
-    Member = Member.query.get(id)
-    db.session.delete(Member)
+    member = Member.query.get(id)
+    db.session.delete(member)
     db.session.commit()
     flash("Member Deleted Successfully")
     return redirect(url_for('members'))
@@ -144,7 +144,6 @@ def add_book():
     if request.method == 'POST':
         title = request.form['title']
         isbn = request.form['isbn']
-        genre = request.form['genre']
         author = request.form['author']
         shelf = request.form['shelf']
         library = Library.query.filter_by(email=session['email']).first()
@@ -165,7 +164,6 @@ def update_book():
         book = Book.query.get(request.form.get('id'))
         book.title = request.form['title']
         book.isbn = request.form['isbn']
-        book.genre = request.form['genre']
         book.author = request.form['author']
         book.shelf = request.form['shelf']
 
