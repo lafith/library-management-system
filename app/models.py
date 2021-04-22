@@ -28,6 +28,7 @@ class Member(db.Model):
     phone = db.Column(db.String(120), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
     library_id = db.Column(db.Integer, db.ForeignKey('library.library_id'))
+    transactions = db.relationship('Transaction', backref='member', lazy=True)
 
     def __repr__(self):
         return f"Member('{self.name}', '{self.email}')"
@@ -55,6 +56,7 @@ class Book(db.Model):
         backref=db.backref('books', lazy='dynamic'))
     library_id = db.Column(
         db.Integer, db.ForeignKey('library.library_id'))
+    transactions = db.relationship('Transaction', backref='book', lazy=True)
 
     def __repr__(self):
         return f"Book('{self.title}', '{self.isbn}')"
@@ -66,3 +68,15 @@ class Author(db.Model):
     """
     author_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), nullable=False)
+
+
+class Transaction(db.Model):
+    """This class defines the table
+    for storing transactions detail
+    """
+    transaction_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('member.member_id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.book_id'))
+    issue_date = db.Column(db.DateTime, default=datetime.utcnow)
+    if_returned = db.Column(db.Boolean, default=False)
