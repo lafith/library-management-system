@@ -142,17 +142,19 @@ def books():
 def add_book():
     """View function to add Member into database"""
     if request.method == 'POST':
+        authors=request.form.getlist("author[]")
+        print(authors)
         title = request.form['title']
         isbn = request.form['isbn']
-        author = request.form['author']
-        shelf = request.form['shelf']
         library = Library.query.filter_by(email=session['email']).first()
+        '''
         book=Book(
             title=title,isbn=isbn,
             genre=genre,author=author,
             shelf=shelf,library=library)
         db.session.add(book)
         db.session.commit()
+        '''
         flash("New book is added", "success")
         return redirect(url_for('books'))
 
