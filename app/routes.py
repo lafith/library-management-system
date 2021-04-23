@@ -241,3 +241,10 @@ def issue_book():
                 else:
                     flash('Debt has crossed the limit! Cannot issue more','danger')
         return redirect(url_for('dashboard'))
+
+@lbms_app.route('/return_book', methods=['GET', 'POST'])
+@is_logged_in
+def return_book():
+    """View function to return a book"""
+    if request.method == 'POST':
+        return redirect(url_for('dashboard'))
