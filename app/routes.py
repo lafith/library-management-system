@@ -247,4 +247,23 @@ def issue_book():
 def return_book():
     """View function to return a book"""
     if request.method == 'POST':
+        member_name = request.form['member']
+        book_id = request.form.get('book_id')
+        book = Book.query.get(book_id)
+        member = Member.query.filter_by(name = member_name).first()
+        if member == None:
+            flash('This member doesnt exist', 'danger')
+        else:
+            if book.available == book.total:
+                flash(' Error! available is same as total stock', 'danger')
+            else:
+                transaction = member.transactions.filter_by(
+                    member_id=member.member_id,
+                    book_id=book_id).first()
+                if transaction is not None:
+                    transaction.if_returned = True
+                    book.available = book.available + 1
+                    db.session.commit()
+                else:
+                    flash('Not issued to this member', 'danger')
         return redirect(url_for('dashboard'))
