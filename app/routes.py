@@ -44,8 +44,10 @@ def login():
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         email = form.email.data
+        library = Library.query.filter_by(email=email).first()
         session['logged_in'] = True
         session['email'] = email
+        session['library_id'] = library.library_id
         flash('You have been logged in!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
@@ -72,11 +74,39 @@ def logout():
     return redirect(url_for('login'))
 
 
-@lbms_app.route('/dashboard')
+@lbms_app.route('/dashboard', methods=['GET', 'POST'])
 @is_logged_in
 def dashboard():
     """view function for dashboard page of each library"""
-    return render_template('dashboard.html')
+    if request.method == "POST":
+        search_string = request.form["search"]
+        search_by = request.form.get("searchby")
+        if search_string != '':
+            if search_by == 'Title':
+                books = Book.query.filter_by(title=search_string, library_id=session['library_id']).all()
+                return render_template('dashboard.html', books=books)
+            elif search_by == 'Author':
+                author = Author.query.filter_by(name = search_string).first()
+                books = author.books
+                return render_template('dashboard.html', books=books)
+        else:
+            library = Library.query.get(session['library_id'])
+            all_books = Book.query.filter_by(library=library)
+            return render_template('dashboard.html', books=all_books)
+    else: 
+        library = Library.query.get(session['library_id'])
+        all_books = Book.query.filter_by(library=library)
+        return render_template('dashboard.html', books=all_books)
+
+
+@lbms_app.route('/results')
+def search_results(request):
+    results = []
+    search_string = request.form['search']
+    print(search_string)
+    #search_by = search.data['']
+    return redirect(url_for('dashboard'))
+    #return render_template('results.html', results=results)
 
 
 @lbms_app.route('/members')
@@ -130,15 +160,6 @@ def delete_member(id):
     return redirect(url_for('members'))
 
 
-@lbms_app.route('/books', methods=['GET', 'POST'])
-@is_logged_in
-def books():
-    """View function for Member management page"""
-    library = Library.query.filter_by(email=session['email']).first()
-    all_books = Book.query.filter_by(library=library)
-    return render_template('books.html', books=all_books)
-
-
 @lbms_app.route('/add_book', methods=['GET', 'POST'])
 @is_logged_in
 def add_book():
@@ -166,7 +187,7 @@ def add_book():
         db.session.commit()
 
         flash("New book is added", "success")
-        return redirect(url_for('books'))
+        return redirect(url_for('dashboard'))
 
 
 @lbms_app.route('/update_book', methods=['GET', 'POST'])
@@ -187,7 +208,7 @@ def update_book():
 
         db.session.commit()
         flash("Book Information Updated Successfully")
-        return redirect(url_for('books'))
+        return redirect(url_for('dashboard'))
 
 
 @lbms_app.route('/delete_book/<id>/', methods=['GET', 'POST'])
@@ -197,4 +218,4 @@ def delete_book(id):
     db.session.delete(book)
     db.session.commit()
     flash("Book info Deleted Successfully")
-    return redirect(url_for('books'))
+    return redirect(url_for('dashboard'))

@@ -1,5 +1,238 @@
 {% extends "layout.html" %} {% block title %} Dashboard{% endblock %} {% block
 content %}
-<h1>DashBoard</h1>
-<small>welcome {{session["email"]}}</small>
+<div class="row">
+  <div class="col md-6">
+    <div class="jumbotron p-3">
+      <h2>
+        Manage <b>Books</b>
+        <button
+          type="button"
+          class="btn btn-success float-right"
+          data-toggle="modal"
+          data-target="#addBookModal"
+        >
+          Add New Book
+        </button>
+      </h2>
+      <form class="form-inline" action="" method="POST">
+        <div class="form-group">
+          <label for="searchbySelect">Search By</label>
+          <select
+            name="searchby"
+            id="searchbySelect"
+            class="custom-select my-1 mr-sm-2"
+          >
+            <option>Title</option>
+            <option>Author</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            name="search"
+            placeholder="keywords..."
+          />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+      </form>
+      <table class="table table-hover table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>ISBN</th>
+          <th>Authors</th>
+          <th>Action</th>
+        </tr>
+        {% for row in books%}
+        <tr>
+          <td>{{row.book_id}}</td>
+          <td>{{row.title}}</td>
+          <td>{{row.isbn}}</td>
+          <td>
+            {% for author in row.authors%} {{author.name}}<br />{%endfor%}
+          </td>
+          <td>
+            <a
+              href="/update/{{row.book_id}}"
+              class="btn btn-warning btn-xs"
+              data-toggle="modal"
+              data-target="#updatebookmodal{{row.book_id}}"
+              >Update</a
+            >
+            <a
+              href="/delete_book/{{row.book_id}}"
+              class="btn btn-danger btn-xs"
+              onclick="return confirm('Confirm Delete?')"
+              >Delete</a
+            >
+          </td>
+        </tr>
+        <!--Modal for updating-->
+        <div
+          id="updatebookmodal{{row.book_id}}"
+          class="modal fade"
+          role="dialog"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Update Information</h4>
+              </div>
+              <div class="modal-body">
+                <form action="{{url_for('update_book')}}" method="POST">
+                  <div class="form-group">
+                    <label>Title:</label>
+                    <input type="hidden" name="id" value="{{row.book_id}}" />
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="title"
+                      value="{{row.title}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>ISBN:</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="isbn"
+                      value="{{row.isbn}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <div class="author-wrapper">
+                      <label>Author info:</label>
+                      {% for author in row.authors%}
+                      <div>
+                        <input
+                          type="text"
+                          class="form-control"
+                          name="author[]"
+                          value="{{author.name}}"
+                        />
+                      </div>
+                      {%endfor%}
+                      <br />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Quantity:</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      name="total"
+                      value="{{row.total}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn-primary" type="submit">
+                      Submit
+                    </button>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">
+                      Close
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {%endfor%}
+      </table>
+    </div>
+    <!--Modal for adding books-->
+    <div id="addBookModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Add Book</h4>
+          </div>
+          <div class="modal-body">
+            <form action="{{url_for('add_book')}}" method="POST">
+              <div class="form-group">
+                <label>Title:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="title"
+                  required="1"
+                />
+              </div>
+              <div class="form-group">
+                <label>ISBN:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="isbn"
+                  required="1"
+                />
+              </div>
+              <div class="form-group">
+                <div class="author-wrapper">
+                  <label>Author info:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="author[]"
+                    value=""
+                  />
+                  <a
+                    href="javascript:void(0);"
+                    class="add-author"
+                    title="Add author"
+                    ><i class="fas fa-plus"></i
+                  ></a>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Quantity:</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  name="total"
+                  required="1"
+                />
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">Submit</button>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    var max_author_fields = 10;
+    var add_author = $(".add-author");
+    var author_wrapper = $(".author-wrapper");
+    var new_author =
+      '<div><input type="text" class="form-control" name="author[]" value=""/><a href="javascript:void(0);" class="remove-author" title="Remove author"><i class="fas fa-minus"></i></a></div>';
+    var add_author_count = 1;
+    $(add_author).click(function () {
+      if (add_author_count < max_author_fields) {
+        add_author_count++;
+        $(author_wrapper).append(new_author);
+      }
+    });
+    $(author_wrapper).on("click", ".remove-author", function (e) {
+      e.preventDefault();
+      $(this).parent("div").remove();
+      add_author_count--;
+    });
+  });
+</script>
 {% endblock %}
