@@ -1,10 +1,10 @@
 from flask import render_template, request, session
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
-from app.models import Library, Member, Book, Author
+from app.models import Library, Member, Book, Author, Transaction
 from app.forms import RegisterForm, LoginForm
 from functools import wraps
-
+from datetime import datetime
 
 @lbms_app.route('/')
 @lbms_app.route('/index')
@@ -97,16 +97,6 @@ def dashboard():
         library = Library.query.get(session['library_id'])
         all_books = Book.query.filter_by(library=library)
         return render_template('dashboard.html', books=all_books)
-
-
-@lbms_app.route('/results')
-def search_results(request):
-    results = []
-    search_string = request.form['search']
-    print(search_string)
-    #search_by = search.data['']
-    return redirect(url_for('dashboard'))
-    #return render_template('results.html', results=results)
 
 
 @lbms_app.route('/members')
@@ -219,3 +209,35 @@ def delete_book(id):
     db.session.commit()
     flash("Book info Deleted Successfully")
     return redirect(url_for('dashboard'))
+
+@lbms_app.route('/issue_book', methods=['GET', 'POST'])
+@is_logged_in
+def issue_book():
+    """View function to issue a book"""
+    if request.method == 'POST':
+        member_name = request.form['member']
+        book_id = request.form.get('book_id')
+        book = Book.query.get(book_id)
+        if book.available == 0:
+            flash('No copies available to issue', 'danger')
+        else:
+            member = Member.query.filter_by(name = member_name).first()
+            if member == None:
+                flash('This member doesnt exist', 'danger')
+            else:
+                transactions = member.transactions
+                return_column = transactions.with_entities(Transaction.if_returned)
+                not_returned = return_column.filter_by(if_returned = False).count()
+                debt = lbms_app.config['RENT_FEE'] * not_returned
+                if debt <= lbms_app.config['DEBT_LIMIT']:
+                    transaction = Transaction(
+                        member_id = member.member_id,
+                        book_id = book_id,
+                        )
+                    book.available = book.available - 1
+                    db.session.add(transaction)
+                    db.session.commit()
+                    flash('Book issued successfully!','success')
+                else:
+                    flash('Debt has crossed the limit! Cannot issue more','danger')
+        return redirect(url_for('dashboard'))

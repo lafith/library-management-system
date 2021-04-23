@@ -14,6 +14,7 @@ content %}
           Add New Book
         </button>
       </h2>
+      <!-- Search box-->
       <form class="form-inline" action="" method="POST">
         <div class="form-group">
           <label for="searchbySelect">Search By</label>
@@ -45,6 +46,7 @@ content %}
           <th>Title</th>
           <th>ISBN</th>
           <th>Authors</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
         {% for row in books%}
@@ -55,7 +57,15 @@ content %}
           <td>
             {% for author in row.authors%} {{author.name}}<br />{%endfor%}
           </td>
+          <td>{{row.available}}/{{row.total}}</td>
           <td>
+            <a
+              href=""
+              class="btn btn-success btn-xs"
+              data-toggle="modal"
+              data-target="#issuebookmodal{{row.book_id}}"
+              >Issue</a
+            >
             <a
               href="/update/{{row.book_id}}"
               class="btn btn-warning btn-xs"
@@ -126,6 +136,48 @@ content %}
                       class="form-control"
                       name="total"
                       value="{{row.total}}"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <button class="btn btn-primary" type="submit">
+                      Submit
+                    </button>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">
+                      Close
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--Modal for issuing book-->
+        <div
+          id="issuebookmodal{{row.book_id}}"
+          class="modal fade"
+          role="dialog"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Issue Book</h4>
+              </div>
+              <div class="modal-body">
+                <form action="{{url_for('issue_book')}}" method="POST">
+                  <div class="form-group">
+                    <label>Member name:</label>
+                    <input
+                      type="hidden"
+                      name="book_id"
+                      value="{{row.book_id}}"
+                    />
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="member"
+                      required="1"
                     />
                   </div>
                   <div class="form-group">
