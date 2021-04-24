@@ -1,21 +1,43 @@
 {% extends "layout.html" %} {% block title %}Report{% endblock %}{% block
 content %}
 <div class="container">
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-header">Popular Books</div>
-        <div class="card-body">
-          <canvas id="popularbooksChart"></canvas>
+  <!--Chart of popular books-->
+  <div class="card">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-10">
+          <p>Popular Books</p>
+        </div>
+        <div class="col-2">
+          <a href="/download_report/01" class="btn btn-success">Download</a>
         </div>
       </div>
+    </div>
+    <div class="card-body">
+      <canvas id="popularbooksChart"></canvas>
+    </div>
+  </div>
+  <!--Chart of highest paying members-->
+  <div class="card">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-10">
+          <p>Highest Paying Members</p>
+        </div>
+        <div class="col-2">
+          <a href="/download_report/02" class="btn btn-success">Download</a>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <canvas id="paymentChart"></canvas>
     </div>
   </div>
 </div>
 
 <script>
-  var ctx = document.getElementById("popularbooksChart").getContext("2d");
-  var chart = new Chart(ctx, {
+  var ctx1 = document.getElementById("popularbooksChart").getContext("2d");
+  var chart = new Chart(ctx1, {
     // The type of chart we want to create
     type: "line",
 
@@ -41,8 +63,7 @@ content %}
             callbacks: {
                 title: function(item, everything) {return;},
                 label: function(item, everything) {
-                    let index = item.dataIndex;
-                    let label = item.formattedValue + " transactions "+index;
+                    let label = item.formattedValue + " transactions";
                     return label;
                 },
                 footer: function(item, everything){
@@ -50,6 +71,42 @@ content %}
                     let note = "Available: "+ {{available|tojson}}[index]
                                 + "/" + {{total|tojson}}[index];
                     return note;
+                },
+            }
+
+        }}
+    },
+  });
+
+  var ctx2 = document.getElementById("paymentChart").getContext("2d");
+  var chart = new Chart(ctx2, {
+    // The type of chart we want to create
+    type: "line",
+
+    // The data for our dataset
+    data: {
+      labels: {{names|tojson}},
+      datasets: [
+        {
+          label: "Total Amount Paid",
+          backgroundColor: "rgb(44,162,95)",
+          borderColor: "rgb(153,216,201)",
+          data: {{amount|tojson}},
+          fill: true,
+        },
+      ],
+    },
+
+    // Configuration options go here
+    options: {
+        plugins:{
+            tooltip:{
+            displayColors: false,
+            callbacks: {
+                title: function(item, everything) {return;},
+                label: function(item, everything) {
+                    let label = "\u20B9" + item.formattedValue;
+                    return label;
                 },
             }
 

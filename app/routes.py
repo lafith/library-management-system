@@ -1,4 +1,4 @@
-from flask import render_template, request, session
+from flask import render_template, request, session, Response
 from flask import flash, redirect, url_for
 from app import lbms_app, db, bcrypt
 from app.models import Library, Member, Book, Author, Transaction
@@ -8,6 +8,9 @@ from datetime import datetime
 import requests
 import math
 import numpy
+import io
+import csv
+
 
 @lbms_app.route('/')
 @lbms_app.route('/index')
@@ -236,6 +239,7 @@ def delete_book(id):
         flash("Book info Deleted Successfully", 'danger')
     return redirect(url_for('dashboard'))
 
+
 @lbms_app.route('/issue_book', methods=['GET', 'POST'])
 @is_logged_in
 def issue_book():
@@ -285,8 +289,9 @@ def return_book():
             else:
                 transaction = member.transactions.filter_by(
                     member_id=member.member_id,
-                    book_id=book_id).first()
+                    book_id=book_id, if_returned=False).first()
                 if transaction is not None:
+                    print('hurrayyy')
                     transaction.if_returned = True
                     book.available = book.available + 1
                     db.session.commit()
@@ -359,19 +364,66 @@ def single_request(url,params):
         return data['message']
 
 
+@lbms_app.route('/download_report/<rp>')
 @lbms_app.route('/report', methods=['GET', 'POST'])
 @is_logged_in
-def report():
+def report(rp=None):
+
     books = Book.query.filter_by(
         library_id=session["library_id"])
     counts=[book.transactions.count() for book in books]
     counts = numpy.array(counts)
-    sort_index = numpy.argsort(counts)
-    counts=counts[sort_index].tolist()
-    isbn = [books[i].isbn for i in sort_index]
-    available = [books[i].available for i in sort_index]
-    total = [books[i].total for i in sort_index]
+    index_1 = numpy.argsort(counts)[-10:]
+    counts=counts[index_1].tolist()
+    isbn = [books[i].isbn for i in index_1]
+    available = [books[i].available for i in index_1]
+    total = [books[i].total for i in index_1]
+
+    
+    members = Member.query.filter_by(
+        library_id=session["library_id"])
+    amount = [member.transactions.filter_by(if_returned=True).count() for member in members]
+    amount = [lbms_app.config['RENT_FEE']*i for i in amount]
+    amount = numpy.array(amount)
+    index_2 = numpy.argsort(amount)[-10:]
+    amount=amount[index_2].tolist()
+    names = [members[i].name for i in index_2]
+
+    if rp == '01':
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        line = ['Title','ISBN','Total Transactions','Available','Total']
+        writer.writerow(line)
+
+        for i,j in enumerate(index_1):
+            line = [
+                books[j].title, books[j].isbn,
+                counts[i], books[j].available,
+                books[j].total]
+            writer.writerow(line)
+        output.seek(0)
+        return Response(
+            output, mimetype="text/csv",
+            headers={"Content-Disposition":"attachment;filename=book_report.csv"})
+    elif rp == '02':
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        line = ['Name','Amount']
+        writer.writerow(line)
+
+        for i,j in enumerate(index_2):
+            line = [
+                members[j].name,
+                amount[i]
+                ]
+            writer.writerow(line)
+        output.seek(0)
+        return Response(
+            output, mimetype="text/csv",
+            headers={"Content-Disposition":"attachment;filename=payment_report.csv"})
     return render_template(
         'report.html', labels=isbn,
         data=counts, available=available,
-        total=total)
+        total=total, names=names, amount=amount)
