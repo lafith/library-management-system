@@ -85,19 +85,39 @@ def dashboard():
         search_by = request.form.get("searchby")
         if search_string != '':
             if search_by == 'Title':
-                books = Book.query.filter_by(title=search_string, library_id=session['library_id']).all()
+                books = Book.query.filter_by(
+                    title=search_string,
+                    library_id=session['library_id'])
+                books = books.order_by(
+                    Book.registered_date.desc()).paginate(
+                        page=page,per_page=lbms_app.config['PER_PAGE_COUNT'])
+                
                 return render_template('dashboard.html', books=books)
             elif search_by == 'Author':
-                author = Author.query.filter_by(name = search_string).first()
+                author = Author.query.filter_by(
+                    name = search_string).first()
                 books = author.books
+                books = books.order_by(
+                    Book.registered_date.desc()).paginate(
+                        page=page,
+                        per_page=lbms_app.config['PER_PAGE_COUNT'])
                 return render_template('dashboard.html', books=books)
         else:
             library = Library.query.get(session['library_id'])
             all_books = Book.query.filter_by(library=library)
+            all_books = all_books.order_by(
+                Book.registered_date.desc()).paginate(
+                    page=page,
+                    per_page=lbms_app.config['PER_PAGE_COUNT'])
             return render_template('dashboard.html', books=all_books)
-    else: 
+    else:
         library = Library.query.get(session['library_id'])
-        all_books = Book.query.filter_by(library=library)
+        page = request.args.get('page', 1, type=int)
+        books_perpage = Book.query.filter_by(library=library)
+        all_books = books_perpage.order_by(
+            Book.registered_date.desc()).paginate(
+                page=page,
+                per_page=lbms_app.config['PER_PAGE_COUNT'])
         return render_template('dashboard.html', books=all_books)
 
 
@@ -137,7 +157,7 @@ def update_member():
         member.phone = request.form['phone']
 
         db.session.commit()
-        flash("Member Information Updated Successfully")
+        flash("Member Information Updated Successfully", "success")
 
         return redirect(url_for('members'))
 
@@ -192,14 +212,14 @@ def update_book():
         book.isbn = request.form['isbn']
         diff = book.total - int(request.form['total'])
         book.total = request.form['total']
-        book.available = book.available + diff
+        book.available = book.available + abs(diff)
 
         updated_authors = request.form.getlist('author[]')
         for i in range(len(book.authors)):
             book.authors[i].name = updated_authors[i]
 
         db.session.commit()
-        flash("Book Information Updated Successfully")
+        flash("Book Information Updated Successfully", "success")
         return redirect(url_for('dashboard'))
 
 
@@ -207,9 +227,12 @@ def update_book():
 def delete_book(id):
     """View function to remove entries from Member table"""
     book = Book.query.get(id)
-    db.session.delete(book)
-    db.session.commit()
-    flash("Book info Deleted Successfully", 'danger')
+    if Transaction.query.filter_by(book_id=id).count() != 0:
+        flash('Cannot Delete, Alread issued copies', 'danger')
+    else:
+        db.session.delete(book)
+        db.session.commit()
+        flash("Book info Deleted Successfully", 'danger')
     return redirect(url_for('dashboard'))
 
 @lbms_app.route('/issue_book', methods=['GET', 'POST'])
@@ -289,7 +312,7 @@ def import_books():
             data.append(msg)
         data = [item for page in data for item in page]
         
-        if required >= 20:
+        if len(data)>required:
             data = data[0:required]
             
         for book in data:
@@ -327,7 +350,7 @@ def single_request(url,params):
     except HTTPError as http_err:
         flash(f'HTTP error occurred: {http_err}', 'danger')
     except Exception as err:
-        flash(f'Other error occurred: {err}')
+        flash(f'Other error occurred: {err}', 'danger')
     else:
         print('Success!')
         data = response.json()

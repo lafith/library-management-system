@@ -59,18 +59,20 @@ content %}
         </div>
       </div>
 
-      <table class="table table-hover table-dark">
+      <table class="table table-hover table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th style="width: 5%">#</th>
+            <th>Title</th>
+            <th style="width: 16.66%">ISBN</th>
+            <th style="width: 10%">Authors</th>
+            <th style="width: 5%">Status</th>
+            <th style="width: 25%">Action</th>
+          </tr>
+        </thead>
+        {% for row in books.items%}
         <tr>
-          <th style="width: 5%">ID</th>
-          <th>Title</th>
-          <th style="width: 16.66%">ISBN</th>
-          <th style="width: 10%">Authors</th>
-          <th style="width: 5%">Status</th>
-          <th style="width: 25%">Action</th>
-        </tr>
-        {% for row in books%}
-        <tr>
-          <td>{{row.book_id}}</td>
+          <td>{{ loop.index }}</td>
           <td>{{row.title}}</td>
           <td>{{row.isbn}}</td>
           <td>
@@ -265,6 +267,21 @@ content %}
         </div>
         {%endfor%}
       </table>
+      {% for page_num in books.iter_pages(left_edge=1, right_edge=1,
+      left_current=1, right_current=2) %} {% if page_num %} {% if books.page ==
+      page_num %}
+      <a
+        class="btn btn-info mb-4"
+        href="{{ url_for('dashboard', page=page_num) }}"
+        >{{ page_num }}</a
+      >
+      {% else %}
+      <a
+        class="btn btn-outline-info mb-4"
+        href="{{ url_for('dashboard', page=page_num) }}"
+        >{{ page_num }}</a
+      >
+      {% endif %} {% else %} ... {% endif %} {% endfor %}
     </div>
     <!--Modal for importing books-->
     <div id="importBookModal" class="modal fade" role="dialog">

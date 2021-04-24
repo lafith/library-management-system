@@ -10,4 +10,5 @@ class Config(object):
     BOOTSTRAP_SERVE_LOCAL=True
     RENT_FEE = 500
     DEBT_LIMIT = 500
+    PER_PAGE_COUNT = 10
 

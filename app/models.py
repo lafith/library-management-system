@@ -51,6 +51,7 @@ class Book(db.Model):
     isbn = db.Column(db.String(15), nullable=False)
     total = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Integer, nullable=False)
+    registered_date = db.Column(db.DateTime, default=datetime.utcnow)
     authors = db.relationship(
         'Author', secondary=authorship,
         backref=db.backref('books', lazy='dynamic'))
