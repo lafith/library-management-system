@@ -5,6 +5,8 @@ from app.models import Library, Member, Book, Author, Transaction
 from app.forms import RegisterForm, LoginForm
 from functools import wraps
 from datetime import datetime
+import requests
+import math
 
 @lbms_app.route('/')
 @lbms_app.route('/index')
@@ -267,3 +269,66 @@ def return_book():
                 else:
                     flash('Not issued to this member', 'danger')
         return redirect(url_for('dashboard'))
+
+
+@lbms_app.route('/import_books', methods=['GET', 'POST'])
+@is_logged_in
+def import_books():
+    url="https://frappe.io/api/method/frappe-library"
+    if request.method == 'POST':
+        params=request.form.to_dict()
+        required = int(params['total'])
+        params.popitem()
+        params = {key:val for key, val in params.items() if val != ''}
+        total_page = math.ceil(required/20)
+        
+        data=[]
+        for i in range(total_page):
+            params['page'] = i+1
+            msg = single_request(url,params)
+            data.append(msg)
+        data = [item for page in data for item in page]
+        
+        if required >= 20:
+            data = data[0:required]
+            
+        for book in data:
+            title = book['title']
+            print(title)
+            isbn = book['isbn13']
+            if Book.query.filter_by(isbn=isbn).count() == 1:
+                continue
+            else:
+                total = 1
+                authors = book["authors"]
+                library = Library.query.get(session['library_id'])
+                book = Book(
+                title=title, isbn=isbn,
+                total=total, available=total,
+                library=library)
+                authors = authors.split('/')
+                for name_ in authors:
+                    author = Author.query.filter_by(name=name_).first()
+                    if author:
+                        book.authors.append(author)
+                    else:
+                        author = Author(name=name_)
+                        db.session.add(author)
+                        book.authors.append(author)
+            
+            db.session.add(book)
+            db.session.commit()
+        return redirect(url_for('dashboard'))
+
+def single_request(url,params):
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+    except HTTPError as http_err:
+        flash(f'HTTP error occurred: {http_err}', 'danger')
+    except Exception as err:
+        flash(f'Other error occurred: {err}')
+    else:
+        print('Success!')
+        data = response.json()
+        return data['message']
