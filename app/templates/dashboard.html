@@ -8,7 +8,7 @@ content %}
           <h2>Manage <b>Books</b></h2>
         </div>
         <div class="row">
-          <div class="col-8">
+          <div class="col-6">
             <form class="form-inline" action="" method="POST">
               <div class="form-group">
                 <label for="searchbySelect">Search By</label>
@@ -34,6 +34,11 @@ content %}
                 <button class="btn btn-primary" type="submit">Search</button>
               </div>
             </form>
+          </div>
+          <div class="col-2">
+            <a href="{{url_for('report')}}" class="btn btn-warning btn-xs"
+              >Report</a
+            >
           </div>
           <div class="col-2">
             <button

@@ -7,6 +7,7 @@ from functools import wraps
 from datetime import datetime
 import requests
 import math
+import numpy
 
 @lbms_app.route('/')
 @lbms_app.route('/index')
@@ -289,6 +290,7 @@ def return_book():
                     transaction.if_returned = True
                     book.available = book.available + 1
                     db.session.commit()
+                    flash('Return Confirmed', 'success')
                 else:
                     flash('Not issued to this member', 'danger')
         return redirect(url_for('dashboard'))
@@ -355,3 +357,21 @@ def single_request(url,params):
         print('Success!')
         data = response.json()
         return data['message']
+
+
+@lbms_app.route('/report', methods=['GET', 'POST'])
+@is_logged_in
+def report():
+    books = Book.query.filter_by(
+        library_id=session["library_id"])
+    counts=[book.transactions.count() for book in books]
+    counts = numpy.array(counts)
+    sort_index = numpy.argsort(counts)
+    counts=counts[sort_index].tolist()
+    isbn = [books[i].isbn for i in sort_index]
+    available = [books[i].available for i in sort_index]
+    total = [books[i].total for i in sort_index]
+    return render_template(
+        'report.html', labels=isbn,
+        data=counts, available=available,
+        total=total)

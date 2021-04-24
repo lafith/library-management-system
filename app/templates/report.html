@@ -1,0 +1,60 @@
+{% extends "layout.html" %} {% block title %}Report{% endblock %}{% block
+content %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">Popular Books</div>
+        <div class="card-body">
+          <canvas id="popularbooksChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var ctx = document.getElementById("popularbooksChart").getContext("2d");
+  var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: "line",
+
+    // The data for our dataset
+    data: {
+      labels: {{labels|tojson}},
+      datasets: [
+        {
+          label: "Number of transactions",
+          backgroundColor: "rgb(44,162,95)",
+          borderColor: "rgb(153,216,201)",
+          data: {{data|tojson}},
+          fill: false,
+        },
+      ],
+    },
+
+    // Configuration options go here
+    options: {
+        plugins:{
+            tooltip:{
+            displayColors: false,
+            callbacks: {
+                title: function(item, everything) {return;},
+                label: function(item, everything) {
+                    let index = item.dataIndex;
+                    let label = item.formattedValue + " transactions "+index;
+                    return label;
+                },
+                footer: function(item, everything){
+                    let index = item[0].dataIndex;
+                    let note = "Available: "+ {{available|tojson}}[index]
+                                + "/" + {{total|tojson}}[index];
+                    return note;
+                },
+            }
+
+        }}
+    },
+  });
+</script>
+{% endblock %}
