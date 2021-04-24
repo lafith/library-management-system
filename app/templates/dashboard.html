@@ -61,12 +61,12 @@ content %}
 
       <table class="table table-hover table-dark">
         <tr>
-          <th>ID</th>
+          <th style="width: 5%">ID</th>
           <th>Title</th>
-          <th>ISBN</th>
-          <th>Authors</th>
-          <th>Status</th>
-          <th>Action</th>
+          <th style="width: 16.66%">ISBN</th>
+          <th style="width: 10%">Authors</th>
+          <th style="width: 5%">Status</th>
+          <th style="width: 25%">Action</th>
         </tr>
         {% for row in books%}
         <tr>
@@ -74,7 +74,7 @@ content %}
           <td>{{row.title}}</td>
           <td>{{row.isbn}}</td>
           <td>
-            {% for author in row.authors%} {{author.name}}<br />{%endfor%}
+            {% for author in row.authors%} {{author.name}},<br />{%endfor%}
           </td>
           <td>{{row.available}}/{{row.total}}</td>
           <td>

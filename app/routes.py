@@ -209,7 +209,7 @@ def delete_book(id):
     book = Book.query.get(id)
     db.session.delete(book)
     db.session.commit()
-    flash("Book info Deleted Successfully")
+    flash("Book info Deleted Successfully", 'danger')
     return redirect(url_for('dashboard'))
 
 @lbms_app.route('/issue_book', methods=['GET', 'POST'])
@@ -296,7 +296,7 @@ def import_books():
             title = book['title']
             print(title)
             isbn = book['isbn13']
-            if Book.query.filter_by(isbn=isbn).count() == 1:
+            if Book.query.filter_by(library_id=session["library_id"], isbn=isbn).count() == 1:
                 continue
             else:
                 total = 1

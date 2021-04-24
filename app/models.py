@@ -48,7 +48,7 @@ class Book(db.Model):
     """
     book_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(20), nullable=False)
-    isbn = db.Column(db.String(15), unique=True, nullable=False)
+    isbn = db.Column(db.String(15), nullable=False)
     total = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Integer, nullable=False)
     authors = db.relationship(
