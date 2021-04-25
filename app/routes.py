@@ -84,45 +84,38 @@ def logout():
 @is_logged_in
 def dashboard():
     """view function for dashboard page of each library"""
+    page = request.args.get('page', 1, type=int)
+    library = Library.query.get(session['library_id'])
+    all_books = Book.query.filter_by(library=library)
+    books_paginated = all_books.order_by(
+        Book.registered_date.desc()).paginate(
+            page=page,
+            per_page=lbms_app.config['PER_PAGE_COUNT'])
+    
     if request.method == "POST":
         search_string = request.form["search"]
         search_by = request.form.get("searchby")
-        if search_string != '':
-            if search_by == 'Title':
-                books = Book.query.filter_by(
-                    title=search_string,
-                    library_id=session['library_id'])
-                books = books.order_by(
-                    Book.registered_date.desc()).paginate(
-                        page=page,per_page=lbms_app.config['PER_PAGE_COUNT'])
-                
-                return render_template('dashboard.html', books=books)
-            elif search_by == 'Author':
-                author = Author.query.filter_by(
-                    name = search_string).first()
-                books = author.books
-                books = books.order_by(
-                    Book.registered_date.desc()).paginate(
-                        page=page,
-                        per_page=lbms_app.config['PER_PAGE_COUNT'])
-                return render_template('dashboard.html', books=books)
-        else:
-            library = Library.query.get(session['library_id'])
-            all_books = Book.query.filter_by(library=library)
-            all_books = all_books.order_by(
+        
+        # TODO: like("%{}%") is not working 
+        if search_by == 'Title':
+            search_string = "%{}%".format(search_string)
+            books = all_books.filter(Book.title.like(search_by)).all()
+            books = books.order_by(
+                Book.registered_date.desc()).paginate(
+                    page=page,per_page=lbms_app.config['PER_PAGE_COUNT'])
+            return render_template('dashboard.html', books=books)
+            
+        elif search_by == 'Author':
+            #search_string = "%{}%".format(search_string)
+            author = Author.query.filter_by(
+                name = search_string).first()
+            books = author.books
+            books = books.order_by(
                 Book.registered_date.desc()).paginate(
                     page=page,
                     per_page=lbms_app.config['PER_PAGE_COUNT'])
-            return render_template('dashboard.html', books=all_books)
-    else:
-        library = Library.query.get(session['library_id'])
-        page = request.args.get('page', 1, type=int)
-        books_perpage = Book.query.filter_by(library=library)
-        all_books = books_perpage.order_by(
-            Book.registered_date.desc()).paginate(
-                page=page,
-                per_page=lbms_app.config['PER_PAGE_COUNT'])
-        return render_template('dashboard.html', books=all_books)
+            return render_template('dashboard.html', books=books)
+    return render_template('dashboard.html', books=books_paginated)
 
 
 @lbms_app.route('/members')

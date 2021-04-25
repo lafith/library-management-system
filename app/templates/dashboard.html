@@ -2,12 +2,14 @@
 content %}
 <div class="row">
   <div class="col md-6">
-    <div class="jumbotron p-3">
+    <div class="jumbotron p-3" style="background-color: #ebf0f5">
       <div class="container">
         <div class="row">
           <h2>Manage <b>Books</b></h2>
         </div>
+
         <div class="row">
+          <!--Search Bar-->
           <div class="col-6">
             <form class="form-inline" action="" method="POST">
               <div class="form-group">
@@ -27,6 +29,7 @@ content %}
                   type="text"
                   class="form-control"
                   name="search"
+                  required="1"
                   placeholder="keywords..."
                 />
               </div>
@@ -35,11 +38,13 @@ content %}
               </div>
             </form>
           </div>
+          <!--Report Button-->
           <div class="col-2">
             <a href="{{url_for('report')}}" class="btn btn-warning btn-xs"
               >Report</a
             >
           </div>
+          <!--button for importing book info from frappe API-->
           <div class="col-2">
             <button
               type="button"
@@ -50,7 +55,7 @@ content %}
               Import Books
             </button>
           </div>
-
+          <!--button for adding new book-->
           <div class="col-2">
             <button
               type="button"
@@ -65,7 +70,7 @@ content %}
       </div>
 
       <table class="table table-hover table-striped">
-        <thead class="thead-dark">
+        <thead class="thead-light">
           <tr>
             <th style="width: 5%">#</th>
             <th>Title</th>
