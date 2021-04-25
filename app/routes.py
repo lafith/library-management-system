@@ -84,9 +84,9 @@ def logout():
 @is_logged_in
 def dashboard():
     """view function for dashboard page of each library"""
-    page = request.args.get('page', 1, type=int)
     library = Library.query.get(session['library_id'])
     all_books = Book.query.filter_by(library=library)
+    page = request.args.get('page', 1, type=int)
     books_paginated = all_books.order_by(
         Book.registered_date.desc()).paginate(
             page=page,
@@ -95,26 +95,27 @@ def dashboard():
     if request.method == "POST":
         search_string = request.form["search"]
         search_by = request.form.get("searchby")
-        
-        # TODO: like("%{}%") is not working 
-        if search_by == 'Title':
-            search_string = "%{}%".format(search_string)
-            books = all_books.filter(Book.title.like(search_by)).all()
+         
+        if search_by == 'Title':    
+            books = all_books.filter(Book.title.like("%{}%".format(search_string)))
+            page = 1
             books = books.order_by(
                 Book.registered_date.desc()).paginate(
                     page=page,per_page=lbms_app.config['PER_PAGE_COUNT'])
             return render_template('dashboard.html', books=books)
-            
         elif search_by == 'Author':
-            #search_string = "%{}%".format(search_string)
-            author = Author.query.filter_by(
-                name = search_string).first()
-            books = author.books
+            authors = Author.query.filter(Author.name.like("%{}%".format(search_string))).all()
+            
+            books = authors[0].books
+            for author in authors[1:]:
+                books.append(author.books)
+            page = 1
             books = books.order_by(
                 Book.registered_date.desc()).paginate(
                     page=page,
                     per_page=lbms_app.config['PER_PAGE_COUNT'])
             return render_template('dashboard.html', books=books)
+            
     return render_template('dashboard.html', books=books_paginated)
 
 
