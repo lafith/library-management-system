@@ -1,22 +1,26 @@
 from flask import render_template, request, session, Response
 from flask import flash, redirect, url_for
-from app import lbms_app, db, bcrypt
+from app import lbms_app, db
 from app.models import Library, Member, Book, Author, Transaction
 from app.forms import RegisterForm, LoginForm
-from functools import wraps
 from datetime import datetime
 import requests
 import math
 import numpy
 import io
 import csv
-
+from app.api import register_library, login_user
+from app.api import is_logged_in, get_allbooks, search_books
+from app.api import get_members, add_member_db, update_member_db
+from app.api import add_book_db, updata_book_db, delete_book_db
+from app.api import add_transaction, update_transaction
+from app.api import fetch_frappe
 
 @lbms_app.route('/')
 @lbms_app.route('/index')
 def index():
-    """View function for home page"""
-    return render_template('home.html')
+    """View function for index page"""
+    return render_template('index.html')
 
 
 @lbms_app.route('/about')
@@ -30,15 +34,10 @@ def register():
     """View function for Registration page"""
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
-        print(form.email)
-        name = form.name.data
-        email = form.email.data
-        password = bcrypt.generate_password_hash(
-            form.password.data
-            ).decode('utf-8')
-        library = Library(name=name, email=email, password=password)
-        db.session.add(library)
-        db.session.commit()
+        register_library(
+            form.name.data,
+            form.email.data,
+            form.password.data)
         flash('You are now registered and can log in', 'success')
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
@@ -49,26 +48,10 @@ def login():
     """View function for login page"""
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
-        email = form.email.data
-        library = Library.query.filter_by(email=email).first()
-        session['logged_in'] = True
-        session['email'] = email
-        session['library_id'] = library.library_id
+        login_user(form.email.data)
         flash('You have been logged in!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
-
-
-def is_logged_in(f):
-    """This function will check if Member is logged in"""
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, Please login', 'danger')
-            return redirect(url_for('login'))
-    return wrap
 
 
 @lbms_app.route('/logout')
@@ -84,10 +67,11 @@ def logout():
 @is_logged_in
 def dashboard():
     """view function for dashboard page of each library"""
-    library = Library.query.get(session['library_id'])
-    all_books = Book.query.filter_by(library=library)
+    
+    books = get_allbooks()
+
     page = request.args.get('page', 1, type=int)
-    books_paginated = all_books.order_by(
+    books_paginated = books.order_by(
         Book.registered_date.desc()).paginate(
             page=page,
             per_page=lbms_app.config['PER_PAGE_COUNT'])
@@ -95,27 +79,9 @@ def dashboard():
     if request.method == "POST":
         search_string = request.form["search"]
         search_by = request.form.get("searchby")
-         
-        if search_by == 'Title':    
-            books = all_books.filter(Book.title.like("%{}%".format(search_string)))
-            page = 1
-            books = books.order_by(
-                Book.registered_date.desc()).paginate(
-                    page=page,per_page=lbms_app.config['PER_PAGE_COUNT'])
-            return render_template('dashboard.html', books=books)
-        elif search_by == 'Author':
-            authors = Author.query.filter(Author.name.like("%{}%".format(search_string))).all()
-            
-            books = authors[0].books
-            for author in authors[1:]:
-                books.append(author.books)
-            page = 1
-            books = books.order_by(
-                Book.registered_date.desc()).paginate(
-                    page=page,
-                    per_page=lbms_app.config['PER_PAGE_COUNT'])
-            return render_template('dashboard.html', books=books)
-            
+
+        books_paginated = search_books(search_by, search_string, books)
+
     return render_template('dashboard.html', books=books_paginated)
 
 
@@ -123,8 +89,7 @@ def dashboard():
 @is_logged_in
 def members():
     """View function for Member management page"""
-    library = Library.query.filter_by(email=session['email']).first()
-    all_members = Member.query.filter_by(library=library)
+    all_members = get_members()
     return render_template('members.html', members=all_members)
 
 
@@ -133,13 +98,11 @@ def members():
 def add_member():
     """View function to add Member into database"""
     if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-        library = Library.query.filter_by(email=session['email']).first()
-        member = Member(name=name, email=email, phone=phone, library=library)
-        db.session.add(member)
-        db.session.commit()
+        add_member_db(
+            request.form['name'],
+            request.form['email'],
+            request.form['phone'])
+        
         flash("New Member is added", "success")
         return redirect(url_for('members'))
 
@@ -149,12 +112,14 @@ def add_member():
 def update_member():
     """View function for updating Member info"""
     if request.method == 'POST':
-        member = Member.query.get(request.form.get('id'))
-        member.name = request.form['name']
-        member.email = request.form['email']
-        member.phone = request.form['phone']
+        add_book_db(request.form)
+        update_member_db(
+            request.form.get('id'),
+            request.form["name"],
+            request.form["email"],
+            request.form["phone"])
 
-        db.session.commit()
+        
         flash("Member Information Updated Successfully", "success")
 
         return redirect(url_for('members'))
@@ -163,9 +128,9 @@ def update_member():
 @lbms_app.route('/delete_member/<id>/', methods=['GET', 'POST'])
 def delete_member(id):
     """View function to remove entries from Member table"""
-    member = Member.query.get(id)
-    db.session.delete(member)
-    db.session.commit()
+    
+    delete_member_db(id)
+
     flash("Member Deleted Successfully")
     return redirect(url_for('members'))
 
@@ -175,26 +140,13 @@ def delete_member(id):
 def add_book():
     """View function to add Member into database"""
     if request.method == 'POST':
+        
         title = request.form['title']
         isbn = request.form['isbn']
         total = request.form['total']
         authors = request.form.getlist("author[]")
-        library = Library.query.filter_by(email=session['email']).first()
-        book = Book(
-            title=title, isbn=isbn,
-            total=total, available=total,
-            library=library)
-        for name_ in authors:
-            author = Author.query.filter_by(name=name_).first()
-            if author:
-                book.authors.append(author)
-            else:
-                author = Author(name=name_)
-                db.session.add(author)
-                book.authors.append(author)
 
-        db.session.add(book)
-        db.session.commit()
+        add_book_db(title, isbn, total, authors)
 
         flash("New book is added", "success")
         return redirect(url_for('dashboard'))
@@ -205,18 +157,15 @@ def add_book():
 def update_book():
     """View function for updating Member info"""
     if request.method == 'POST':
-        book = Book.query.get(request.form.get('id'))
-        book.title = request.form['title']
-        book.isbn = request.form['isbn']
-        diff = book.total - int(request.form['total'])
-        book.total = request.form['total']
-        book.available = book.available + abs(diff)
 
-        updated_authors = request.form.getlist('author[]')
-        for i in range(len(book.authors)):
-            book.authors[i].name = updated_authors[i]
+        book_id = request.form.get('id')
+        title = request.form['title']
+        isbn = request.form['isbn']
+        total = request.form['total']
+        authors = request.form.getlist('author[]')
+        updata_book_db(id, title, isbn, total, authors)
 
-        db.session.commit()
+    
         flash("Book Information Updated Successfully", "success")
         return redirect(url_for('dashboard'))
 
@@ -224,13 +173,9 @@ def update_book():
 @lbms_app.route('/delete_book/<id>/', methods=['GET', 'POST'])
 def delete_book(id):
     """View function to remove entries from Member table"""
-    book = Book.query.get(id)
-    if Transaction.query.filter_by(book_id=id).count() != 0:
-        flash('Cannot Delete, Alread issued copies', 'danger')
-    else:
-        db.session.delete(book)
-        db.session.commit()
-        flash("Book info Deleted Successfully", 'danger')
+    delete_book_db(id)
+    
+    flash("Book info Deleted Successfully", 'danger')
     return redirect(url_for('dashboard'))
 
 
@@ -241,29 +186,7 @@ def issue_book():
     if request.method == 'POST':
         member_name = request.form['member']
         book_id = request.form.get('book_id')
-        book = Book.query.get(book_id)
-        if book.available == 0:
-            flash('No copies available to issue', 'danger')
-        else:
-            member = Member.query.filter_by(name = member_name).first()
-            if member == None:
-                flash('This member doesnt exist', 'danger')
-            else:
-                transactions = member.transactions
-                return_column = transactions.with_entities(Transaction.if_returned)
-                not_returned = return_column.filter_by(if_returned = False).count()
-                debt = lbms_app.config['RENT_FEE'] * not_returned
-                if debt <= lbms_app.config['DEBT_LIMIT']:
-                    transaction = Transaction(
-                        member_id = member.member_id,
-                        book_id = book_id,
-                        )
-                    book.available = book.available - 1
-                    db.session.add(transaction)
-                    db.session.commit()
-                    flash('Book issued successfully!','success')
-                else:
-                    flash('Debt has crossed the limit! Cannot issue more','danger')
+        add_transaction(book_id, member_name)
         return redirect(url_for('dashboard'))
 
 @lbms_app.route('/return_book', methods=['GET', 'POST'])
@@ -273,25 +196,8 @@ def return_book():
     if request.method == 'POST':
         member_name = request.form['member']
         book_id = request.form.get('book_id')
-        book = Book.query.get(book_id)
-        member = Member.query.filter_by(name = member_name).first()
-        if member == None:
-            flash('This member doesnt exist', 'danger')
-        else:
-            if book.available == book.total:
-                flash(' Error! available is same as total stock', 'danger')
-            else:
-                transaction = member.transactions.filter_by(
-                    member_id=member.member_id,
-                    book_id=book_id, if_returned=False).first()
-                if transaction is not None:
-                    print('hurrayyy')
-                    transaction.if_returned = True
-                    book.available = book.available + 1
-                    db.session.commit()
-                    flash('Return Confirmed', 'success')
-                else:
-                    flash('Not issued to this member', 'danger')
+        update_transaction(book_id, member_name)
+
         return redirect(url_for('dashboard'))
 
 
@@ -304,65 +210,15 @@ def import_books():
         required = int(params['total'])
         params.popitem()
         params = {key:val for key, val in params.items() if val != ''}
-        total_page = math.ceil(required/20)
         
-        data=[]
-        for i in range(total_page):
-            params['page'] = i+1
-            msg = single_request(url,params)
-            data.append(msg)
-        data = [item for page in data for item in page]
-        
-        if len(data)>required:
-            data = data[0:required]
-            
-        for book in data:
-            title = book['title']
-            print(title)
-            isbn = book['isbn13']
-            if Book.query.filter_by(library_id=session["library_id"], isbn=isbn).count() == 1:
-                continue
-            else:
-                total = 1
-                authors = book["authors"]
-                library = Library.query.get(session['library_id'])
-                book = Book(
-                title=title, isbn=isbn,
-                total=total, available=total,
-                library=library)
-                authors = authors.split('/')
-                for name_ in authors:
-                    author = Author.query.filter_by(name=name_).first()
-                    if author:
-                        book.authors.append(author)
-                    else:
-                        author = Author(name=name_)
-                        db.session.add(author)
-                        book.authors.append(author)
-            
-            db.session.add(book)
-            db.session.commit()
+        fetch_frappe(url, params, required)
+
         return redirect(url_for('dashboard'))
-
-def single_request(url,params):
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-    except HTTPError as http_err:
-        flash(f'HTTP error occurred: {http_err}', 'danger')
-    except Exception as err:
-        flash(f'Other error occurred: {err}', 'danger')
-    else:
-        print('Success!')
-        data = response.json()
-        return data['message']
-
 
 @lbms_app.route('/download_report/<rp>')
 @lbms_app.route('/report', methods=['GET', 'POST'])
 @is_logged_in
 def report(rp=None):
-
     books = Book.query.filter_by(
         library_id=session["library_id"])
     counts=[book.transactions.count() for book in books]
