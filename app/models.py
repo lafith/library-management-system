@@ -28,7 +28,8 @@ class Member(db.Model):
     phone = db.Column(db.String(120), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
     library_id = db.Column(db.Integer, db.ForeignKey('library.library_id'))
-    transactions = db.relationship('Transaction', backref='member', lazy='dynamic')
+    transactions = db.relationship(
+        'Transaction', backref='member', lazy='dynamic')
 
     def __repr__(self):
         return f"Member('{self.name}', '{self.email}')"
@@ -57,7 +58,8 @@ class Book(db.Model):
         backref=db.backref('books', lazy='dynamic'))
     library_id = db.Column(
         db.Integer, db.ForeignKey('library.library_id'))
-    transactions = db.relationship('Transaction', backref='book', lazy='dynamic')
+    transactions = db.relationship(
+        'Transaction', backref='book', lazy='dynamic')
 
     def __repr__(self):
         return f"Book('{self.title}', '{self.isbn}')"

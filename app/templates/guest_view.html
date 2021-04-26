@@ -1,0 +1,79 @@
+{% extends "layout.html" %} {% block title %} Guest View{% endblock %} {% block
+content %}
+<div class="row">
+  <div class="col md-6">
+    <div class="jumbotron p-3" style="background-color: #ebf0f5">
+      <div class="container">
+        <div class="row">
+          <!--Search Bar-->
+          <div class="col-6">
+            <form class="form-inline" action="" method="POST">
+              <div class="form-group">
+                <label for="searchbySelect">Search By</label>
+                <select
+                  name="searchby"
+                  id="searchbySelect"
+                  class="custom-select my-1 mr-sm-2"
+                >
+                  <option>Title</option>
+                  <option>Author</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="search"
+                  required="1"
+                  placeholder="keywords..."
+                />
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">Search</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <table class="table table-hover table-striped">
+        <thead class="thead-light">
+          <tr>
+            <th style="width: 5%">#</th>
+            <th>Title</th>
+            <th style="width: 16.66%">ISBN</th>
+            <th style="width: 10%">Authors</th>
+            <th style="width: 5%">Status</th>
+          </tr>
+        </thead>
+        {% for row in books.items%}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{row.title}}</td>
+          <td>{{row.isbn}}</td>
+          <td>
+            {% for author in row.authors%} {{author.name}},<br />{%endfor%}
+          </td>
+          <td>{{row.available}}/{{row.total}}</td>
+        </tr>
+        {%endfor%}
+      </table>
+      {% for page_num in books.iter_pages(left_edge=1, right_edge=1,
+      left_current=1, right_current=2) %} {% if page_num %} {% if books.page ==
+      page_num %}
+      <a
+        class="btn btn-info mb-4"
+        href="{{ url_for('dashboard', page=page_num) }}"
+        >{{ page_num }}</a
+      >
+      {% else %}
+      <a
+        class="btn btn-outline-info mb-4"
+        href="{{ url_for('dashboard', page=page_num) }}"
+        >{{ page_num }}</a
+      >
+      {% endif %} {% else %} ... {% endif %} {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

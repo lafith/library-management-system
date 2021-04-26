@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SelectField, validators
+from wtforms import StringField, PasswordField, validators
 from app import bcrypt
 from app.models import Library
 from email_validator import validate_email, EmailNotValidError
@@ -71,9 +71,3 @@ class LoginForm(FlaskForm):
                     library.password,
                     password_candidate):
                 raise validators.ValidationError('Invalid Login')
-
-class BookSearchForm(FlaskForm):
-    choices = [('Title', 'Title'),
-               ('Author', 'Author'),]
-    select = SelectField('Search by:', choices=choices)
-    search = StringField('')
