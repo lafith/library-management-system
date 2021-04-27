@@ -1,58 +1,74 @@
 from flask import render_template, request, session, Response
 from flask import flash, redirect, url_for
-from app import lbms_app
-from app.models import Member, Book
+from app import app
+from app.models import Librarian, Member, Book
 from app.forms import RegisterForm, LoginForm
 import numpy
 import io
 import csv
-from app.api import register_library, login_user
-from app.api import is_logged_in, get_allbooks, search_books
+from app.api import register_librarian
+from app.api import get_allbooks, search_books
 from app.api import get_members, add_member_db, update_member_db
-from app.api import add_book_db, updata_book_db, delete_book_db
+from app.api import add_book_db, update_book_db, delete_book_db
 from app.api import add_transaction, update_transaction
 from app.api import fetch_frappe, delete_member_db
+from functools import wraps
 
-
-@lbms_app.route('/')
-@lbms_app.route('/index')
+@app.route('/')
+@app.route('/index')
 def index():
     """View function for index page"""
     return render_template('index.html')
 
 
-@lbms_app.route('/about')
+@app.route('/about')
 def about():
     """View function for About Us page"""
     return render_template('about.html')
 
 
-@lbms_app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     """View function for Registration page"""
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
-        register_library(
+        register_librarian(
             form.name.data,
             form.email.data,
             form.password.data)
         flash('You are now registered and can log in', 'success')
-        return redirect(url_for('index'))
+        return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
 
-@lbms_app.route('/login', methods=['GET', 'POST'])
+def is_logged_in(f):
+    """Check if user is logged in"""
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, Please login', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     """View function for login page"""
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
-        login_user(form.email.data)
+        email = form.email.data
+        librarian = Librarian.query.filter_by(
+            email=email).first()
+        session['logged_in'] = True
+        session['email'] = email
+        session['librarian_id'] = librarian.librarian_id
         flash('You have been logged in!', 'success')
         return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
 
 
-@lbms_app.route('/logout')
+@app.route('/logout')
 @is_logged_in
 def logout():
     """view function for logout tab"""
@@ -61,17 +77,17 @@ def logout():
     return redirect(url_for('login'))
 
 
-@lbms_app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 @is_logged_in
 def dashboard():
-    """view function for dashboard page of each library"""
+    """view function for dashboard"""
     books = get_allbooks()
 
     page = request.args.get('page', 1, type=int)
     books_paginated = books.order_by(
         Book.registered_date.desc()).paginate(
             page=page,
-            per_page=lbms_app.config['PER_PAGE_COUNT'])
+            per_page=app.config['PER_PAGE_COUNT'])
 
     if request.method == "POST":
         search_string = request.form["search"]
@@ -82,16 +98,16 @@ def dashboard():
     return render_template('dashboard.html', books=books_paginated)
 
 
-@lbms_app.route('/guest', methods=['GET', 'POST'])
+@app.route('/guest', methods=['GET', 'POST'])
 def guest():
-    """view function for dashboard page of each library"""
+    """view function for guest view made for members"""
     books = get_allbooks()
 
     page = request.args.get('page', 1, type=int)
     books_paginated = books.order_by(
         Book.registered_date.desc()).paginate(
             page=page,
-            per_page=lbms_app.config['PER_PAGE_COUNT'])
+            per_page=app.config['PER_PAGE_COUNT'])
 
     if request.method == "POST":
         search_string = request.form["search"]
@@ -102,7 +118,7 @@ def guest():
     return render_template('guest_view.html', books=books_paginated)
 
 
-@lbms_app.route('/members')
+@app.route('/members')
 @is_logged_in
 def members():
     """View function for Member management page"""
@@ -110,7 +126,7 @@ def members():
     return render_template('members.html', members=all_members)
 
 
-@lbms_app.route('/add_member', methods=['GET', 'POST'])
+@app.route('/add_member', methods=['GET', 'POST'])
 @is_logged_in
 def add_member():
     """View function to add Member into database"""
@@ -123,7 +139,7 @@ def add_member():
         return redirect(url_for('members'))
 
 
-@lbms_app.route('/update_member', methods=['GET', 'POST'])
+@app.route('/update_member', methods=['GET', 'POST'])
 @is_logged_in
 def update_member():
     """View function for updating Member info"""
@@ -139,7 +155,7 @@ def update_member():
         return redirect(url_for('members'))
 
 
-@lbms_app.route('/delete_member/<id>/', methods=['GET', 'POST'])
+@app.route('/delete_member/<id>/', methods=['GET', 'POST'])
 def delete_member(id):
     """View function to remove entries from Member table"""
     delete_member_db(id)
@@ -147,7 +163,7 @@ def delete_member(id):
     return redirect(url_for('members'))
 
 
-@lbms_app.route('/add_book', methods=['GET', 'POST'])
+@app.route('/add_book', methods=['GET', 'POST'])
 @is_logged_in
 def add_book():
     """View function to add Member into database"""
@@ -163,7 +179,7 @@ def add_book():
         return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/update_book', methods=['GET', 'POST'])
+@app.route('/update_book', methods=['GET', 'POST'])
 @is_logged_in
 def update_book():
     """View function for updating Member info"""
@@ -174,13 +190,13 @@ def update_book():
         isbn = request.form['isbn']
         total = request.form['total']
         authors = request.form.getlist('author[]')
-        updata_book_db(book_id, title, isbn, total, authors)
+        update_book_db(book_id, title, isbn, total, authors)
 
         flash("Book Information Updated Successfully", "success")
         return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/delete_book/<id>/', methods=['GET', 'POST'])
+@app.route('/delete_book/<id>/', methods=['GET', 'POST'])
 def delete_book(id):
     """View function to remove entries from Member table"""
     delete_book_db(id)
@@ -189,7 +205,7 @@ def delete_book(id):
     return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/issue_book', methods=['GET', 'POST'])
+@app.route('/issue_book', methods=['GET', 'POST'])
 @is_logged_in
 def issue_book():
     """View function to issue a book"""
@@ -200,7 +216,7 @@ def issue_book():
         return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/return_book', methods=['GET', 'POST'])
+@app.route('/return_book', methods=['GET', 'POST'])
 @is_logged_in
 def return_book():
     """View function to return a book"""
@@ -212,7 +228,7 @@ def return_book():
         return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/import_books', methods=['GET', 'POST'])
+@app.route('/import_books', methods=['GET', 'POST'])
 @is_logged_in
 def import_books():
     url = "https://frappe.io/api/method/frappe-library"
@@ -228,12 +244,11 @@ def import_books():
         return redirect(url_for('dashboard'))
 
 
-@lbms_app.route('/download_report/<rp>')
-@lbms_app.route('/report', methods=['GET', 'POST'])
+@app.route('/download_report/<rp>')
+@app.route('/report', methods=['GET', 'POST'])
 @is_logged_in
 def report(rp=None):
-    books = Book.query.filter_by(
-        library_id=session["library_id"])
+    books = Book.query.all()
     counts = [book.transactions.count() for book in books]
     counts = numpy.array(counts)
     index_1 = numpy.argsort(counts)[-10:]
@@ -242,12 +257,11 @@ def report(rp=None):
     available = [books[i].available for i in index_1]
     total = [books[i].total for i in index_1]
 
-    members = Member.query.filter_by(
-        library_id=session["library_id"])
+    members = Member.query.all()
     amount = [
         member.transactions.filter_by(
             if_returned=True).count() for member in members]
-    amount = [lbms_app.config['RENT_FEE']*i for i in amount]
+    amount = [app.config['RENT_FEE']*i for i in amount]
     amount = numpy.array(amount)
     index_2 = numpy.argsort(amount)[-10:]
     amount = amount[index_2].tolist()

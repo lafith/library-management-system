@@ -2,20 +2,18 @@ from app import db
 from datetime import datetime
 
 
-class Library(db.Model):
+class Librarian(db.Model):
     """This class defines the table
-    for library information
+    information regarding a librarian
     """
-    library_id = db.Column(db.Integer, primary_key=True)
+    librarian_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
-    members = db.relationship('Member', backref='library', lazy=True)
-    books = db.relationship('Book', backref='library', lazy=True)
 
     def __repr__(self):
-        return f"Library('{self.name}', '{self.email}')"
+        return f"Librarian('{self.name}', '{self.email}')"
 
 
 class Member(db.Model):
@@ -27,7 +25,6 @@ class Member(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(120), nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
-    library_id = db.Column(db.Integer, db.ForeignKey('library.library_id'))
     transactions = db.relationship(
         'Transaction', backref='member', lazy='dynamic')
 
@@ -49,15 +46,13 @@ class Book(db.Model):
     """
     book_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(20), nullable=False)
-    isbn = db.Column(db.String(15), nullable=False)
+    isbn = db.Column(db.String(15), unique=True, nullable=False)
     total = db.Column(db.Integer, nullable=False)
     available = db.Column(db.Integer, nullable=False)
     registered_date = db.Column(db.DateTime, default=datetime.utcnow)
     authors = db.relationship(
         'Author', secondary=authorship,
         backref=db.backref('books', lazy='dynamic'))
-    library_id = db.Column(
-        db.Integer, db.ForeignKey('library.library_id'))
     transactions = db.relationship(
         'Transaction', backref='book', lazy='dynamic')
 

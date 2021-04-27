@@ -1,70 +1,42 @@
-from flask import session, redirect, url_for, flash
-from app import lbms_app, db, bcrypt
-from app.models import Library, Book, Author
+from flask import flash
+from app import app, db, bcrypt
+from app.models import Librarian, Book, Author
 from app.models import Member, Transaction
-from functools import wraps
+
 import math
 import requests
 
 
-def register_library(name, email, password):
-    """Add new library account info into Register table
+def register_librarian(name, email, password):
+    """Add new librarian account info into Register table
 
     Parameters
     ----------
     name : str
-        name of library
+        name of librarian
     email : str
-        unique email used by a library
+        unique email used by a librarian
     password : str
     """
     password = bcrypt.generate_password_hash(
         password).decode('utf-8')
-    library = Library(
+    librarian = Librarian(
         name=name,
         email=email,
         password=password)
-    db.session.add(library)
+    db.session.add(librarian)
     db.session.commit()
 
 
-def login_user(email):
-    """Update session parameters on authentication
-
-    Parameters
-    ----------
-    email : str
-        Library email used for logging in
-    """
-    library = Library.query.filter_by(
-        email=email).first()
-    session['logged_in'] = True
-    session['email'] = email
-    session['library_id'] = library.library_id
-
-
-def is_logged_in(f):
-    """Check if user is logged in"""
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, Please login', 'danger')
-            return redirect(url_for('login'))
-    return wrap
-
-
 def get_allbooks():
-    """Fetch all book info belonging to the library
+    """Fetch all book info belonging to the librarian
 
     Returns
     -------
     BaseQuery
         Iterable object containing info of all books
     """
-    library = Library.query.get(session['library_id'])
-    all_books = Book.query.filter_by(library=library)
+    all_books = Book.query.filter()
     return all_books
 
 
@@ -111,7 +83,7 @@ def searchby_title(title, all_books):
     page = 1
     books = books.order_by(
         Book.registered_date.desc()).paginate(
-            page=page, per_page=lbms_app.config['PER_PAGE_COUNT'])
+            page=page, per_page=app.config['PER_PAGE_COUNT'])
     return books
 
 
@@ -141,7 +113,7 @@ def searchby_author(author, all_books):
     books = books.order_by(
         Book.registered_date.desc()).paginate(
             page=page,
-            per_page=lbms_app.config['PER_PAGE_COUNT'])
+            per_page=app.config['PER_PAGE_COUNT'])
     return books
 
 
@@ -153,8 +125,7 @@ def get_members():
     BaseQuery
         Iterable object containing all member info
     """
-    library = Library.query.filter_by(email=session['email']).first()
-    all_members = Member.query.filter_by(library=library)
+    all_members = Member.query.filter()
     return all_members
 
 
@@ -170,8 +141,7 @@ def add_member_db(name, email, phone):
     phone : str
         Contact number of the new member
     """
-    library = Library.query.filter_by(email=session['email']).first()
-    member = Member(name=name, email=email, phone=phone, library=library)
+    member = Member(name=name, email=email, phone=phone)
     db.session.add(member)
     db.session.commit()
 
@@ -226,11 +196,9 @@ def add_book_db(
     authors : list
         Names of authors
     """
-    library = Library.query.filter_by(email=session['email']).first()
     book = Book(
         title=title, isbn=isbn,
-        total=total, available=total,
-        library=library)
+        total=total, available=total)
     for name_ in authors:
         author = Author.query.filter_by(name=name_).first()
         if author:
@@ -244,7 +212,7 @@ def add_book_db(
     db.session.commit()
 
 
-def updata_book_db(book_id, title, isbn, total, authors):
+def update_book_db(book_id, title, isbn, total, authors):
     """Update a book entry
 
     Parameters
@@ -310,8 +278,8 @@ def add_transaction(book_id, member_name):
             transactions = member.transactions
             return_column = transactions.with_entities(Transaction.if_returned)
             not_returned = return_column.filter_by(if_returned=False).count()
-            debt = lbms_app.config['RENT_FEE'] * not_returned
-            if debt <= lbms_app.config['DEBT_LIMIT']:
+            debt = app.config['RENT_FEE'] * not_returned
+            if debt <= app.config['DEBT_LIMIT']:
                 transaction = Transaction(
                     member_id=member.member_id,
                     book_id=book_id,
@@ -386,20 +354,16 @@ def fetch_frappe(
         title = book['title']
         isbn = book['isbn13']
 
-        count = Book.query.filter_by(
-            library_id=session["library_id"],
-            isbn=isbn).count()
+        count = Book.query.filter_by(isbn=isbn).count()
 
         if count == 1:
             continue
         else:
             total = 1
             authors = book["authors"]
-            library = Library.query.get(session['library_id'])
             book = Book(
                 title=title, isbn=isbn,
-                total=total, available=total,
-                library=library)
+                total=total, available=total)
             authors = authors.split('/')
             for name_ in authors:
                 author = Author.query.filter_by(name=name_).first()

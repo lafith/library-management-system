@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators
 from app import bcrypt
-from app.models import Library
+from app.models import Librarian
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -17,8 +17,8 @@ class RegisterForm(FlaskForm):
     confirm = PasswordField('Confirm Password')
 
     def validate_name(self, name):
-        library = Library.query.filter_by(name=name.data).first()
-        if library:
+        librarian = Librarian.query.filter_by(name=name.data).first()
+        if librarian:
             raise validators.ValidationError(
                 'That name is taken. Please choose a different one.'
                 )
@@ -35,8 +35,8 @@ class RegisterForm(FlaskForm):
             # email is not valid, exception message is human-readable
             raise validators.ValidationError(str(e))
 
-        library = Library.query.filter_by(email=email).first()
-        if library:
+        librarian = Librarian.query.filter_by(email=email).first()
+        if librarian:
             raise validators.ValidationError(
                 'That email is taken. Please choose a different one.'
                 )
@@ -58,16 +58,16 @@ class LoginForm(FlaskForm):
         except EmailNotValidError as e:
             raise validators.ValidationError(str(e))
         # Search database for the entered email
-        library = Library.query.filter_by(email=email).first()
-        if not library:
+        librarian = Librarian.query.filter_by(email=email).first()
+        if not librarian:
             raise validators.ValidationError('Email not found')
 
     def validate_password(self, password):
         email = self.email.data
-        library = Library.query.filter_by(email=email).first()
-        if library:
+        librarian = Librarian.query.filter_by(email=email).first()
+        if librarian:
             password_candidate = password.data
             if not bcrypt.check_password_hash(
-                    library.password,
+                    librarian.password,
                     password_candidate):
                 raise validators.ValidationError('Invalid Login')

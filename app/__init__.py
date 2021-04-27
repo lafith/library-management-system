@@ -3,16 +3,14 @@ from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_bootstrap import Bootstrap
 
 
-lbms_app = Flask(__name__)
-lbms_app.config.from_object(Config)
-Bootstrap(lbms_app)
+app = Flask(__name__)
+app.config.from_object(Config)
 # database setup
-db = SQLAlchemy(lbms_app)
-migrate = Migrate(lbms_app, db)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-bcrypt = Bcrypt(lbms_app)
+bcrypt = Bcrypt(app)
 
 from app import routes
