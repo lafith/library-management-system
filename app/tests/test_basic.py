@@ -51,11 +51,13 @@ class BasicTests(unittest.TestCase):
 
     # tests:
     def test_index_page(self):
+        """Ensure index page is loaded"""
         response = self.app.get('/', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Welcome To LbMS', response.data)
 
     def test_registeration_page(self):
+        """Ensure validation in registeration page is working"""
         response = self.register(
             'admin@gmail.com', 'admin',
             '1234', '1234')
@@ -63,6 +65,7 @@ class BasicTests(unittest.TestCase):
         self.assertIn(b'You are now registered and can log in', response.data)
 
     def test_invalid_registeration(self):
+        """Ensure validation in registeration page is loaded"""
         response = self.register(
             'admin@gmail.com', 'admin',
             '1234', '123')
@@ -70,10 +73,12 @@ class BasicTests(unittest.TestCase):
         self.assertIn(b'Passwords do not match', response.data)
 
     def test_register(self):
+        """Ensure the addition of entry into Librarian table"""
         register_librarian('admin', 'admin@gmail.com', '123')
         self.assertEqual(Librarian.query.get('1').name, 'admin')
 
     def test_login(self):
+        """Ensure the addition of entry into Librarian table"""
         register_librarian('admin', 'admin@gmail.com', '123')
         response = self.login('admin@gmail.com', '123')
         self.assertEqual(response.status_code, 200)

@@ -14,6 +14,7 @@ from app.api import add_transaction, update_transaction
 from app.api import fetch_frappe, delete_member_db
 from functools import wraps
 
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -51,6 +52,7 @@ def is_logged_in(f):
             flash('Unauthorized, Please login', 'danger')
             return redirect(url_for('login'))
     return wrap
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -253,7 +255,10 @@ def report(rp=None):
     counts = numpy.array(counts)
     index_1 = numpy.argsort(counts)[-10:]
     counts = counts[index_1].tolist()
-    isbn = [books[i].isbn for i in index_1]
+    index_1 = index_1[::-1]
+    counts = counts[::-1]
+    
+    title = [books[i].title for i in index_1]
     available = [books[i].available for i in index_1]
     total = [books[i].total for i in index_1]
 
@@ -309,6 +314,6 @@ def report(rp=None):
                 "Content-Disposition":
                 "attachment;filename=payment_report.csv"})
     return render_template(
-        'report.html', labels=isbn,
+        'report.html', labels=title,
         data=counts, available=available,
         total=total, names=names, amount=amount)

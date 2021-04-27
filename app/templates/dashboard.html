@@ -1,427 +1,376 @@
 {% extends "layout.html" %} {% block title %} Dashboard{% endblock %} {% block
 content %}
-<div class="row">
-  <div class="col md-6">
-    <div class="jumbotron p-3" style="background-color: #d8e4f4">
-      <div class="container">
-        <div class="row justify-content-between">
-          <div class="col-4">
-            <h2>Manage <b>Books</b></h2>
-          </div>
-        </div>
-
-        <div class="row justify-content-between">
-          <!--Search Bar-->
-          <div class="col-6">
-            <form class="form-inline" action="" method="POST">
-              <div class="form-group">
-                <label for="searchbySelect">Search By</label>
-                <select
-                  name="searchby"
-                  id="searchbySelect"
-                  class="custom-select my-1 mr-sm-2"
-                >
-                  <option>Title</option>
-                  <option>Author</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  name="search"
-                  required="1"
-                  placeholder="keywords..."
-                />
-              </div>
-              <div class="form-group">
-                <button class="btn btn-primary" type="submit">Search</button>
-              </div>
-            </form>
-          </div>
-
-          <!--button for importing book info from frappe API-->
-          <div class="col-6">
-            <div
-              class="btn-toolbar"
-              role="toolbar"
-              aria-label="Toolbar with button groups"
+<div class="container">
+  <div class="jumbotron p-3" style="background-color: #ffffff">
+    <h2>Manage <b>Books</b></h2>
+    <!--second row-->
+    <div class="row justify-content-between">
+      <!--search bar-->
+      <div class="col-6">
+        <form class="form-inline" action="" method="POST">
+          <select
+            name="searchby"
+            id="searchbySelect"
+            data-suptext="Searchby"
+            class="custom-select my-1 mr-sm-2"
+          >
+            <option>Title</option>
+            <option>Author</option>
+          </select>
+          <input
+            type="text"
+            class="form-control"
+            name="search"
+            required="1"
+            placeholder="keywords..."
+          />
+          <button class="btn btn-primary" type="Submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+      </div>
+      <!--import/add books:-->
+      <div class="col-4">
+        <div
+          class="btn-toolbar"
+          role="toolbar"
+          aria-label="Toolbar with button groups"
+        >
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button
+              type="button"
+              class="btn btn-success float-right"
+              data-toggle="modal"
+              data-target="#importBookModal"
             >
-              <div class="btn-group mr-2" role="group" aria-label="First group">
-                <a
-                  href="{{url_for('report')}}"
-                  class="btn btn-warning btn-xs"
-                  type="button"
-                  >Report</a
-                >
-              </div>
-              <div class="btn-group mr-2" role="group" aria-label="First group">
-                <button
-                  type="button"
-                  class="btn btn-success float-right"
-                  data-toggle="modal"
-                  data-target="#importBookModal"
-                >
-                  Import Books
-                </button>
-              </div>
-              <div class="btn-group mr-2" role="group" aria-label="First group">
-                <!--button for adding new book-->
-
-                <button
-                  type="button"
-                  class="btn btn-success float-right"
-                  data-toggle="modal"
-                  data-target="#addBookModal"
-                >
-                  Add New Book
-                </button>
-              </div>
-            </div>
+              Import Books
+            </button>
+          </div>
+          <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button
+              type="button"
+              class="btn btn-success float-right"
+              data-toggle="modal"
+              data-target="#addBookModal"
+            >
+              Add New Book
+            </button>
           </div>
         </div>
       </div>
-
-      <table class="table table-hover table-striped">
-        <thead class="thead-light">
-          <tr>
-            <th style="width: 5%">#</th>
-            <th>Title</th>
-            <th style="width: 16.66%">ISBN</th>
-            <th style="width: 10%">Authors</th>
-            <th style="width: 5%">Status</th>
-            <th style="width: 25%">Action</th>
-          </tr>
-        </thead>
-        {% for row in books.items%}
+    </div>
+    <!--table-->
+    <table class="table table-hover table-striped">
+      <thead class="thead-light">
         <tr>
-          <td>{{row.book_id}}</td>
-          <td>{{row.title}}</td>
-          <td>{{row.isbn}}</td>
-          <td>
-            {% for author in row.authors%} {{author.name}},<br />{%endfor%}
-          </td>
-          <td>{{row.available}}/{{row.total}}</td>
-          <td>
-            <a
-              href=""
-              class="btn btn-success btn-xs"
-              data-toggle="modal"
-              data-target="#issuebookmodal{{row.book_id}}"
-              >Issue</a
-            >
-            <a
-              href=""
-              class="btn btn-primary btn-xs"
-              data-toggle="modal"
-              data-target="#returnbookmodal{{row.book_id}}"
-              >Return</a
-            >
-            <a
-              href="/update/{{row.book_id}}"
-              class="btn btn-warning btn-xs"
-              data-toggle="modal"
-              data-target="#updatebookmodal{{row.book_id}}"
-              >Edit</a
-            >
-          </td>
+          <th style="width: 5%">#</th>
+          <th>Title</th>
+          <th style="width: 16.66%">ISBN</th>
+          <th style="width: 10%">Authors</th>
+          <th style="width: 5%">Status</th>
+          <th style="width: 25%">Action</th>
         </tr>
-        <!--Modal for updating-->
-        <div
-          id="updatebookmodal{{row.book_id}}"
-          class="modal fade"
-          role="dialog"
-        >
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title">Update Information</h4>
-              </div>
-              <div class="modal-body">
-                <form action="{{url_for('update_book')}}" method="POST">
-                  <div class="form-group">
-                    <label>Title:</label>
-                    <input type="hidden" name="id" value="{{row.book_id}}" />
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="title"
-                      value="{{row.title}}"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>ISBN:</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="isbn"
-                      value="{{row.isbn}}"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <div class="author-wrapper">
-                      <label>Author info:</label>
-                      {% for author in row.authors%}
-                      <div>
-                        <input
-                          type="text"
-                          class="form-control"
-                          name="author[]"
-                          value="{{author.name}}"
-                        />
-                      </div>
-                      {%endfor%}
-                      <br />
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Quantity:</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      name="total"
-                      value="{{row.total}}"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <button class="btn btn-primary" type="submit">
-                      Submit
-                    </button>
-                  </div>
-                  <div class="modal-footer">
-                    <a
-                      href="/delete_book/{{row.book_id}}"
-                      class="btn btn-danger btn-xs"
-                      onclick="return confirm('Confirm Delete?')"
-                      >Delete</a
-                    >
-                    <button class="btn btn-secondary" data-dismiss="modal">
-                      Close
-                    </button>
-                  </div>
-                </form>
-              </div>
+      </thead>
+      {% for row in books.items%}
+      <tr>
+        <td>{{row.book_id}}</td>
+        <td>{{row.title}}</td>
+        <td>{{row.isbn}}</td>
+        <td>{% for author in row.authors%} {{author.name}},<br />{%endfor%}</td>
+        <td>{{row.available}}/{{row.total}}</td>
+        <td>
+          <a
+            href=""
+            class="btn btn-success btn-xs"
+            data-toggle="modal"
+            data-target="#issuebookmodal{{row.book_id}}"
+            >Issue</a
+          >
+          <a
+            href=""
+            class="btn btn-primary btn-xs"
+            data-toggle="modal"
+            data-target="#returnbookmodal{{row.book_id}}"
+            >Return</a
+          >
+          <a
+            href="/update/{{row.book_id}}"
+            class="btn btn-warning btn-xs"
+            data-toggle="modal"
+            data-target="#updatebookmodal{{row.book_id}}"
+            >Edit</a
+          >
+        </td>
+      </tr>
+      <!--Modal for updating-->
+      <div id="updatebookmodal{{row.book_id}}" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Update Information</h4>
             </div>
-          </div>
-        </div>
-        <!--Modal for issuing book-->
-        <div
-          id="issuebookmodal{{row.book_id}}"
-          class="modal fade"
-          role="dialog"
-        >
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title">Issue Book</h4>
-              </div>
-              <div class="modal-body">
-                <form action="{{url_for('issue_book')}}" method="POST">
-                  <div class="form-group">
-                    <label>Member name:</label>
-                    <input
-                      type="hidden"
-                      name="book_id"
-                      value="{{row.book_id}}"
-                    />
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="member"
-                      required="1"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <button class="btn btn-primary" type="submit">
-                      Submit
-                    </button>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">
-                      Close
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--Modal for returning book-->
-        <div
-          id="returnbookmodal{{row.book_id}}"
-          class="modal fade"
-          role="dialog"
-        >
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title">Return Book</h4>
-              </div>
-              <div class="modal-body">
-                <form action="{{url_for('return_book')}}" method="POST">
-                  <div class="form-group">
-                    <label>Member name:</label>
-                    <input
-                      type="hidden"
-                      name="book_id"
-                      value="{{row.book_id}}"
-                    />
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="member"
-                      required="1"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <button class="btn btn-primary" type="submit">
-                      Submit
-                    </button>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">
-                      Close
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        {%endfor%}
-      </table>
-      {% for page_num in books.iter_pages(left_edge=1, right_edge=1,
-      left_current=1, right_current=2) %} {% if page_num %} {% if books.page ==
-      page_num %}
-      <a
-        class="btn btn-info mb-4"
-        href="{{ url_for('dashboard', page=page_num) }}"
-        >{{ page_num }}</a
-      >
-      {% else %}
-      <a
-        class="btn btn-outline-info mb-4"
-        href="{{ url_for('dashboard', page=page_num) }}"
-        >{{ page_num }}</a
-      >
-      {% endif %} {% else %} ... {% endif %} {% endfor %}
-    </div>
-    <!--Modal for importing books-->
-    <div id="importBookModal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Filter by</h4>
-          </div>
-          <div class="modal-body">
-            <form action="{{url_for('import_books')}}" method="POST">
-              <div class="form-group">
-                <label>Title:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="title"
-                  placeholder="Any or type here..."
-                />
-              </div>
-              <div class="form-group">
-                <label>Author:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="author"
-                  placeholder="Any or type here..."
-                />
-              </div>
-              <div class="form-group">
-                <label>total:</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="total"
-                  value="20"
-                />
-              </div>
-              <div class="form-group">
-                <button class="btn btn-primary" type="submit">Submit</button>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">
-                  Close
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!--Modal for adding books-->
-    <div id="addBookModal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Add Book</h4>
-          </div>
-          <div class="modal-body">
-            <form action="{{url_for('add_book')}}" method="POST">
-              <div class="form-group">
-                <label>Title:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="title"
-                  required="1"
-                />
-              </div>
-              <div class="form-group">
-                <label>ISBN:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="isbn"
-                  required="1"
-                />
-              </div>
-              <div class="form-group">
-                <div class="author-wrapper">
-                  <label>Author info:</label>
+            <div class="modal-body">
+              <form action="{{url_for('update_book')}}" method="POST">
+                <div class="form-group">
+                  <label>Title:</label>
+                  <input type="hidden" name="id" value="{{row.book_id}}" />
                   <input
                     type="text"
                     class="form-control"
-                    name="author[]"
-                    value=""
+                    name="title"
+                    value="{{row.title}}"
                   />
-                  <a
-                    href="javascript:void(0);"
-                    class="add-author"
-                    title="Add author"
-                    ><i class="fas fa-plus"></i
-                  ></a>
                 </div>
-              </div>
-              <div class="form-group">
-                <label>Quantity:</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="total"
-                  required="1"
-                />
-              </div>
-              <div class="form-group">
-                <button class="btn btn-primary" type="submit">Submit</button>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">
-                  Close
-                </button>
-              </div>
-            </form>
+                <div class="form-group">
+                  <label>ISBN:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="isbn"
+                    value="{{row.isbn}}"
+                  />
+                </div>
+                <div class="form-group">
+                  <div class="author-wrapper">
+                    <label>Author info:</label>
+                    {% for author in row.authors%}
+                    <div>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="author[]"
+                        value="{{author.name}}"
+                      />
+                    </div>
+                    {%endfor%}
+                    <br />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Quantity:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="total"
+                    value="{{row.total}}"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+                <div class="modal-footer">
+                  <a
+                    href="/delete_book/{{row.book_id}}"
+                    class="btn btn-danger btn-xs"
+                    onclick="return confirm('Confirm Delete?')"
+                    >Delete</a
+                  >
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
+      <!--Modal for issuing book-->
+      <div id="issuebookmodal{{row.book_id}}" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Issue Book</h4>
+            </div>
+            <div class="modal-body">
+              <form action="{{url_for('issue_book')}}" method="POST">
+                <div class="form-group">
+                  <label>Member name:</label>
+                  <input type="hidden" name="book_id" value="{{row.book_id}}" />
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="member"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Modal for returning book-->
+      <div id="returnbookmodal{{row.book_id}}" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Return Book</h4>
+            </div>
+            <div class="modal-body">
+              <form action="{{url_for('return_book')}}" method="POST">
+                <div class="form-group">
+                  <label>Member name:</label>
+                  <input type="hidden" name="book_id" value="{{row.book_id}}" />
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="member"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {%endfor%}
+    </table>
+    {% for page_num in books.iter_pages(left_edge=1, right_edge=1,
+        left_current=1, right_current=2) %} {% if page_num %} {% if books.page ==
+        page_num %}
+        <a
+          class="btn btn-info mb-4"
+          href="{{ url_for('dashboard', page=page_num) }}"
+          >{{ page_num }}</a
+        >
+        {% else %}
+        <a
+          class="btn btn-outline-info mb-4"
+          href="{{ url_for('dashboard', page=page_num) }}"
+          >{{ page_num }}</a
+        >
+        {% endif %} {% else %} ... {% endif %} {% endfor %}
     </div>
+      <!--Modal for importing books-->
+      <div id="importBookModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Filter by</h4>
+            </div>
+            <div class="modal-body">
+              <form action="{{url_for('import_books')}}" method="POST">
+                <div class="form-group">
+                  <label>Title:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    placeholder="Any or type here..."
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Author:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="author"
+                    placeholder="Any or type here..."
+                  />
+                </div>
+                <div class="form-group">
+                  <label>total:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="total"
+                    value="20"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--Modal for adding books-->
+      <div id="addBookModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Add Book</h4>
+            </div>
+            <div class="modal-body">
+              <form action="{{url_for('add_book')}}" method="POST">
+                <div class="form-group">
+                  <label>Title:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>ISBN:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="isbn"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <div class="author-wrapper">
+                    <label>Author info:</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="author[]"
+                      value=""
+                    />
+                    <a
+                      href="javascript:void(0);"
+                      class="add-author"
+                      title="Add author"
+                      ><i class="fas fa-plus"></i
+                    ></a>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Quantity:</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="total"
+                    required="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary" type="submit">Submit</button>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-dismiss="modal">
+                    Close
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
   </div>
 </div>
 <script>

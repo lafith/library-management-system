@@ -1,9 +1,13 @@
 {% extends "layout.html" %}{% block title %}LbMS{% endblock %} {% block content
 %}
-<div class="jumbotron text-center" style="background-color: #d8e4f4">
-  <div class="container">
-    <h1>Welcome To LbMS</h1>
-    <p>LbMS is a simple web application for library management.</p>
-  </div>
+<div class="jumbotron text-center">
+  <h1 class="display-4">Welcome to LbMS</h1>
+  <p class="lead">LbMS is a simple web application for library management.</p>
+  <hr class="my-4" />
+  <p class="lead">
+    <a class="btn btn-primary btn-lg" href="{{url_for('guest')}}" role="button"
+      >Browse our catalogue</a
+    >
+  </p>
 </div>
 {% endblock %}

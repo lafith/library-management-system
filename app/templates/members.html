@@ -1,130 +1,60 @@
 {% extends "layout.html" %} {% block title %}members{% endblock %}{% block
 content %}
 <div class="container">
-  <div class="row">
-    <div class="col md-12">
-      <div class="jumbotron p-3">
-        <h2>
-          Manage <b>Members</b>
-          <button
-            type="button"
-            class="btn btn-success float-right"
-            data-toggle="modal"
-            data-target="#mymodal"
-          >
-            Add New Member
-          </button>
-        </h2>
-        <table class="table table-hover table-striped">
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Contact</th>
-            <th>Action</th>
-          </tr>
+  <div class="jumbotron p-3" style="background-color: #ffffff">
+    <h2>
+      Manage <b>Members</b>
+      <button
+        type="button"
+        class="btn btn-success float-right"
+        data-toggle="modal"
+        data-target="#mymodal"
+      >
+        Add New Member
+      </button>
+    </h2>
+    <table class="table table-hover table-striped">
+      <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Contact</th>
+        <th>Action</th>
+      </tr>
 
-          {% for row in members%}
-          <tr>
-            <td>{{row.member_id}}</td>
-            <td>{{row.name}}</td>
-            <td>{{row.email}}</td>
-            <td>{{row.phone}}</td>
-            <td>
-              <a
-                href="/update_member/{{row.member_id}}"
-                class="btn btn-warning btn-xs"
-                data-toggle="modal"
-                data-target="#updatemodal{{row.member_id}}"
-                >Edit</a
-              >
-            </td>
-          </tr>
-          <!--Modal for Updating-->
-          <div
-            id="updatemodal{{row.member_id}}"
-            class="modal fade"
-            role="dialog"
+      {% for row in members%}
+      <tr>
+        <td>{{row.member_id}}</td>
+        <td>{{row.name}}</td>
+        <td>{{row.email}}</td>
+        <td>{{row.phone}}</td>
+        <td>
+          <a
+            href="/update_member/{{row.member_id}}"
+            class="btn btn-warning btn-xs"
+            data-toggle="modal"
+            data-target="#updatemodal{{row.member_id}}"
+            >Edit</a
           >
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h4 class="modal-title">Update Information</h4>
-                </div>
-                <div class="modal-body">
-                  <form action="{{url_for('update_member')}}" method="POST">
-                    <div class="form-group">
-                      <label>Name:</label>
-                      <input
-                        type="hidden"
-                        name="id"
-                        value="{{row.member_id}}"
-                      />
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="name"
-                        value="{{row.name}}"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Email:</label>
-                      <input
-                        type="email"
-                        class="form-control"
-                        name="email"
-                        value="{{row.email}}"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Phone:</label>
-                      <input
-                        type="number"
-                        class="form-control"
-                        name="phone"
-                        value="{{row.phone}}"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <button class="btn btn-primary" type="submit">
-                        Submit
-                      </button>
-                    </div>
-                    <div class="modal-footer">
-                      <a
-                        href="/delete_member/{{row.member_id}}"
-                        class="btn btn-danger btn-xs"
-                        onclick="return confirm('Confirm Delete?')"
-                        >Delete</a
-                      >
-                      <button class="btn btn-secondary" data-dismiss="modal">
-                        Close
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-          {%endfor%}
-        </table>
-      </div>
-      <!--Modal for adding member-->
-      <div id="mymodal" class="modal fade" role="dialog">
+        </td>
+      </tr>
+      <!--Modal for Updating-->
+      <div id="updatemodal{{row.member_id}}" class="modal fade" role="dialog">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title">Add Member</h4>
+              <h4 class="modal-title">Update Information</h4>
             </div>
             <div class="modal-body">
-              <form action="{{url_for('add_member')}}" method="POST">
+              <form action="{{url_for('update_member')}}" method="POST">
                 <div class="form-group">
                   <label>Name:</label>
+                  <input type="hidden" name="id" value="{{row.member_id}}" />
                   <input
                     type="text"
                     class="form-control"
                     name="name"
-                    required="1"
+                    value="{{row.name}}"
                   />
                 </div>
                 <div class="form-group">
@@ -133,7 +63,7 @@ content %}
                     type="email"
                     class="form-control"
                     name="email"
-                    required="1"
+                    value="{{row.email}}"
                   />
                 </div>
                 <div class="form-group">
@@ -142,13 +72,19 @@ content %}
                     type="number"
                     class="form-control"
                     name="phone"
-                    required="1"
+                    value="{{row.phone}}"
                   />
                 </div>
                 <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Add</button>
+                  <button class="btn btn-primary" type="submit">Submit</button>
                 </div>
                 <div class="modal-footer">
+                  <a
+                    href="/delete_member/{{row.member_id}}"
+                    class="btn btn-danger btn-xs"
+                    onclick="return confirm('Confirm Delete?')"
+                    >Delete</a
+                  >
                   <button class="btn btn-secondary" data-dismiss="modal">
                     Close
                   </button>
@@ -156,6 +92,56 @@ content %}
               </form>
             </div>
           </div>
+        </div>
+      </div>
+      {%endfor%}
+    </table>
+  </div>
+  <!--Modal for adding member-->
+  <div id="mymodal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Add Member</h4>
+        </div>
+        <div class="modal-body">
+          <form action="{{url_for('add_member')}}" method="POST">
+            <div class="form-group">
+              <label>Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="name"
+                required="1"
+              />
+            </div>
+            <div class="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                required="1"
+              />
+            </div>
+            <div class="form-group">
+              <label>Phone:</label>
+              <input
+                type="number"
+                class="form-control"
+                name="phone"
+                required="1"
+              />
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" type="submit">Add</button>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" data-dismiss="modal">
+                Close
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
