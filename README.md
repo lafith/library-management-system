@@ -35,3 +35,41 @@ foo@bar:~$ python3 lbms.py
 - Charts for visualizing reports
 - Guest view for members to browse the catalogue
 - Deployed on [PythonAnywhere](http://lafith.pythonanywhere.com/)
+
+### Screenshots:
+
+- Home page:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116450020-6d67e780-a878-11eb-9968-5fb26e790a42.png" width=699 height=393>
+</p>
+
+- Login & Register:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116450371-d8b1b980-a878-11eb-96d2-2d2066584718.png" width=425 height=269>
+<img src="https://user-images.githubusercontent.com/39316548/116450391-e0715e00-a878-11eb-8668-e98764d96b93.png" width=425 height=269>
+</p>
+
+- Dashboard:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116450105-88d2f280-a878-11eb-9c5e-238e48ede77f.png" width=699 height=393>
+</p>
+
+- Members:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116454624-d2720c00-a87d-11eb-85b6-184ecb216e40.png" width=699 height=393>
+</p>
+
+- Popular Books:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116455108-50ceae00-a87e-11eb-8e01-edf93a5e34ba.png" width=699 height=393>
+</p>
+
+- Highest paying members:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116455194-6a6ff580-a87e-11eb-9f71-d46fdfb5e2da.png" width=699 height=393>
+</p>
+
+- Guest view:
+<p align="middle">
+<img src="https://user-images.githubusercontent.com/39316548/116455302-85426a00-a87e-11eb-8b23-f3e88cc8d73f.png" width=699 height=393>
+</p>
