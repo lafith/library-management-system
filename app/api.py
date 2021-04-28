@@ -1,3 +1,4 @@
+from urllib.error import HTTPError
 from flask import flash
 from app import app, db, bcrypt
 from app.models import Librarian, Book, Author
