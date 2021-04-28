@@ -232,9 +232,11 @@ def update_book_db(book_id, title, isbn, total, authors):
     book = Book.query.get(book_id)
     book.title = title
     book.isbn = isbn
+    # update the number of available copies
     diff = book.total - int(total)
     book.total = total
     book.available = book.available + abs(diff)
+    # update author names
     updated_authors = authors
     for i in range(len(book.authors)):
         book.authors[i].name = updated_authors[i]
@@ -340,6 +342,8 @@ def fetch_frappe(
     required : int
         Number of entries to be imported
     """
+    # calculating number of requests required since
+    # one request contains 20 books
     total_page = math.ceil(required/20)
     data = []
     for i in range(total_page):
@@ -351,6 +355,7 @@ def fetch_frappe(
     if len(data) > required:
         data = data[0:required]
 
+    # exrtact the required information from the message
     for book in data:
         title = book['title']
         isbn = book['isbn13']

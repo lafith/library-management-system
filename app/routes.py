@@ -1,18 +1,19 @@
-from flask import render_template, request, session, Response
-from flask import flash, redirect, url_for
-from app import app
-from app.models import Librarian, Member, Book
-from app.forms import RegisterForm, LoginForm
 import numpy
 import io
 import csv
-from app.api import register_librarian
-from app.api import get_allbooks, search_books
+from app import app
+from functools import wraps
+from flask import render_template, request, session, Response
+from flask import flash, redirect, url_for
+
+from app.models import Librarian, Member, Book
+from app.forms import RegisterForm, LoginForm
+
+from app.api import register_librarian, get_allbooks, search_books
 from app.api import get_members, add_member_db, update_member_db
 from app.api import add_book_db, update_book_db, delete_book_db
 from app.api import add_transaction, update_transaction
 from app.api import fetch_frappe, delete_member_db
-from functools import wraps
 
 
 @app.route('/')
@@ -252,17 +253,20 @@ def import_books():
 @is_logged_in
 def report(rp=None):
     books = Book.query.all()
+
+    # extract top 10 books with more transactions:
     counts = [book.transactions.count() for book in books]
     counts = numpy.array(counts)
     index_1 = numpy.argsort(counts)[-10:]
     counts = counts[index_1].tolist()
     index_1 = index_1[::-1]
     counts = counts[::-1]
-    
+
     title = [books[i].title for i in index_1]
     available = [books[i].available for i in index_1]
     total = [books[i].total for i in index_1]
 
+    # extract top 10 members with more returns
     members = Member.query.all()
     amount = [
         member.transactions.filter_by(
@@ -273,6 +277,7 @@ def report(rp=None):
     amount = amount[index_2].tolist()
     names = [members[i].name for i in index_2]
 
+    # if rp is not None reports get downloaded
     if rp == '01':
         output = io.StringIO()
         writer = csv.writer(output)

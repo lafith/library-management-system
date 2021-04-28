@@ -44,7 +44,7 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     """This class defines the web form
-    for the registration page"""
+    for the login page"""
     email = StringField('Email', [validators.Length(min=6, max=50)])
     password = PasswordField('Password', [validators.DataRequired()])
 
