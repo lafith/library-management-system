@@ -66,7 +66,7 @@ foo@bar:~$ python3 lbms.py
 
 - Highest paying members:
 <p align="middle">
-<img src="https://user-images.githubusercontent.com/39316548/116455194-6a6ff580-a87e-11eb-9f71-d46fdfb5e2da.png" width=699 height=393>
+<img src="https://user-images.githubusercontent.com/39316548/116455720-0a2d8380-a87f-11eb-9412-e4ed1a987e06.png" width=699 height=393>
 </p>
 
 - Guest view:
