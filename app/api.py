@@ -397,6 +397,8 @@ def single_request(url, params):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
+    except HTTPError as http_err:
+        flash(f'HTTP error occurred: {http_err}', 'danger')
     except Exception as err:
         flash(f'Error occurred: {err}', 'danger')
     else:
