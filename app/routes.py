@@ -240,9 +240,10 @@ def import_books():
         params.popitem()
         params = {
             key: val for key, val in params.items() if val != ''}
-
-        fetch_frappe(url, params, required)
-
+        try:
+            fetch_frappe(url, params, required)
+        except Exception:
+            return redirect(url_for('dashboard'))
         return redirect(url_for('dashboard'))
 
 
