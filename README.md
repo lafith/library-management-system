@@ -22,3 +22,16 @@ foo@bar:~$ flask db upgrade
 ```console
 foo@bar:~$ python3 lbms.py
 ```
+
+## Implemented functionalities:
+
+- A librarian can maintain Books, Members and Transactions
+- CRUD operations on Books and Members
+- Issuing a book to a member
+- Returning a book; Rent fee & Debt limit is specified in config file
+- Search for a book by name and author
+- Importing books from [Frappe API](https://frappe.io/api/method/frappe-library)
+- Downloadable reports of popular books and highest paying members
+- Charts for visualizing reports
+- Guest view for members to browse the catalogue
+- Deployed on [PythonAnywhere](http://lafith.pythonanywhere.com/)
