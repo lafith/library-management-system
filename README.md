@@ -45,18 +45,18 @@ foo@bar:~$ python3 lbms.py
 
 - Login & Register:
 <p align="middle">
-<img src="https://user-images.githubusercontent.com/39316548/116450371-d8b1b980-a878-11eb-96d2-2d2066584718.png" width=425 height=269>
-<img src="https://user-images.githubusercontent.com/39316548/116450391-e0715e00-a878-11eb-8668-e98764d96b93.png" width=425 height=269>
+<img src="https://user-images.githubusercontent.com/39316548/116450371-d8b1b980-a878-11eb-96d2-2d2066584718.png" width=400 height=269>
+<img src="https://user-images.githubusercontent.com/39316548/116450391-e0715e00-a878-11eb-8668-e98764d96b93.png" width=400 height=269>
 </p>
 
 - Dashboard:
 <p align="middle">
-<img src="https://user-images.githubusercontent.com/39316548/116450105-88d2f280-a878-11eb-9c5e-238e48ede77f.png" width=699 height=393>
+<img src="https://user-images.githubusercontent.com/39316548/117497311-f75d3200-af95-11eb-8dc8-8260a91f4b4a.png" width=699 height=393>
 </p>
 
 - Members:
 <p align="middle">
-<img src="https://user-images.githubusercontent.com/39316548/116454624-d2720c00-a87d-11eb-85b6-184ecb216e40.png" width=699 height=393>
+<img src="https://user-images.githubusercontent.com/39316548/117497498-325f6580-af96-11eb-95f7-a3588a4c2221.png" width=699 height=393>
 </p>
 
 - Popular Books:
