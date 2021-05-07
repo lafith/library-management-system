@@ -8,7 +8,8 @@ content %}
       <!--search bar-->
       <div class="col-6">
         <form class="form-inline" action="" method="POST">
-          <select
+            
+                <select
             name="searchby"
             id="searchbySelect"
             data-suptext="Searchby"
@@ -17,6 +18,7 @@ content %}
             <option>Title</option>
             <option>Author</option>
           </select>
+          <div class="input-group">
           <input
             type="text"
             class="form-control"
@@ -24,39 +26,34 @@ content %}
             required="1"
             placeholder="keywords..."
           />
-          <button class="btn btn-primary" type="Submit">
-            <i class="fas fa-search"></i>
-          </button>
+          <div class="input-group-btn">
+            <button class="btn btn-primary" type="Submit">
+                <i class="fas fa-search"></i>
+              </button>
+          </div>
+
+            </div>
         </form>
       </div>
       <!--import/add books:-->
       <div class="col-4">
-        <div
-          class="btn-toolbar"
-          role="toolbar"
-          aria-label="Toolbar with button groups"
-        >
-          <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button
-              type="button"
-              class="btn btn-success float-right"
-              data-toggle="modal"
-              data-target="#importBookModal"
-            >
-              Import Books
-            </button>
-          </div>
-          <div class="btn-group mr-2" role="group" aria-label="First group">
-            <button
+        <button
+        type="button"
+        class="btn btn-success float-right"
+        data-toggle="modal"
+        data-target="#importBookModal"
+      >
+        Import Books
+      </button>
+      <button
               type="button"
               class="btn btn-success float-right"
               data-toggle="modal"
               data-target="#addBookModal"
+              style="margin-right:10px"
             >
               Add New Book
             </button>
-          </div>
-        </div>
       </div>
     </div>
     <!--table-->
@@ -95,11 +92,17 @@ content %}
           >
           <a
             href="/update/{{row.book_id}}"
-            class="btn btn-warning btn-xs"
+            class="btn"
             data-toggle="modal"
             data-target="#updatebookmodal{{row.book_id}}"
-            >Edit</a
+            ><i class="fas fa-edit"></i></a
           >
+          <a
+                    href="/delete_book/{{row.book_id}}"
+                    class="btn"
+                    onclick="return confirm('Confirm Delete?')"
+                    ><i class="fas fa-trash"></i></a
+                  >
         </td>
       </tr>
       <!--Modal for updating-->
@@ -108,6 +111,7 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Update Information</h4>
+	            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('update_book')}}" method="POST">
@@ -130,11 +134,10 @@ content %}
                     value="{{row.isbn}}"
                   />
                 </div>
-                <div class="form-group">
                   <div class="author-wrapper">
                     <label>Author info:</label>
                     {% for author in row.authors%}
-                    <div>
+                    <div class="form-group">
                       <input
                         type="text"
                         class="form-control"
@@ -143,9 +146,7 @@ content %}
                       />
                     </div>
                     {%endfor%}
-                    <br />
                   </div>
-                </div>
                 <div class="form-group">
                   <label>Quantity:</label>
                   <input
@@ -155,19 +156,9 @@ content %}
                     value="{{row.total}}"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <a
-                    href="/delete_book/{{row.book_id}}"
-                    class="btn btn-danger btn-xs"
-                    onclick="return confirm('Confirm Delete?')"
-                    >Delete</a
-                  >
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
+                  
+                  <button class="btn btn-primary" type="submit">Submit</button>
                 </div>
               </form>
             </div>
@@ -180,6 +171,7 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Issue Book</h4>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('issue_book')}}" method="POST">
@@ -193,13 +185,8 @@ content %}
                     required="1"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
+                    <button class="btn btn-primary" type="submit">Submit</button>
                 </div>
               </form>
             </div>
@@ -212,6 +199,7 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Return Book</h4>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('return_book')}}" method="POST">
@@ -225,13 +213,8 @@ content %}
                     required="1"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
+                    <button class="btn btn-primary" type="submit">Submit</button>
                 </div>
               </form>
             </div>
@@ -262,6 +245,7 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Filter by</h4>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('import_books')}}" method="POST">
@@ -292,13 +276,8 @@ content %}
                     value="20"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
+                    <button class="btn btn-primary" type="submit">Import</button>
                 </div>
               </form>
             </div>
@@ -311,6 +290,7 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Add Book</h4>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('add_book')}}" method="POST">
@@ -358,14 +338,9 @@ content %}
                     required="1"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
-                </div>
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
               </form>
             </div>
           </div>
@@ -379,7 +354,7 @@ content %}
     var add_author = $(".add-author");
     var author_wrapper = $(".author-wrapper");
     var new_author =
-      '<div><input type="text" class="form-control" name="author[]" value=""/><a href="javascript:void(0);" class="remove-author" title="Remove author"><i class="fas fa-minus"></i></a></div>';
+			  '<div class="form-group"><input type="text" class="form-control" name="author[]" value=""/><a href="javascript:void(0);" class="remove-author" title="Remove author"><i class="fas fa-minus"></i></a></div>';
     var add_author_count = 1;
     $(add_author).click(function () {
       if (add_author_count < max_author_fields) {

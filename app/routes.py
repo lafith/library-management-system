@@ -162,7 +162,7 @@ def update_member():
 def delete_member(id):
     """View function to remove entries from Member table"""
     delete_member_db(id)
-    flash("Member Deleted Successfully")
+    flash("Member Deleted Successfully", 'danger')
     return redirect(url_for('members'))
 
 

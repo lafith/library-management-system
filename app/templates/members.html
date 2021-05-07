@@ -31,11 +31,17 @@ content %}
         <td>
           <a
             href="/update_member/{{row.member_id}}"
-            class="btn btn-warning btn-xs"
+            class="btn btn-xs"
             data-toggle="modal"
             data-target="#updatemodal{{row.member_id}}"
-            >Edit</a
-          >
+            ><i class="fas fa-edit"></i
+          ></a>
+          <a
+            href="/delete_member/{{row.member_id}}"
+            class="btn btn-xs"
+            onclick="return confirm('Confirm Delete?')"
+            ><i class="fas fa-user-minus"></i
+          ></a>
         </td>
       </tr>
       <!--Modal for Updating-->
@@ -44,6 +50,9 @@ content %}
           <div class="modal-content">
             <div class="modal-header">
               <h4 class="modal-title">Update Information</h4>
+              <button type="button" class="close" data-dismiss="modal">
+                <span>&times;</span>
+              </button>
             </div>
             <div class="modal-body">
               <form action="{{url_for('update_member')}}" method="POST">
@@ -75,19 +84,8 @@ content %}
                     value="{{row.phone}}"
                   />
                 </div>
-                <div class="form-group">
-                  <button class="btn btn-primary" type="submit">Submit</button>
-                </div>
                 <div class="modal-footer">
-                  <a
-                    href="/delete_member/{{row.member_id}}"
-                    class="btn btn-danger btn-xs"
-                    onclick="return confirm('Confirm Delete?')"
-                    >Delete</a
-                  >
-                  <button class="btn btn-secondary" data-dismiss="modal">
-                    Close
-                  </button>
+                  <button class="btn btn-primary" type="submit">Submit</button>
                 </div>
               </form>
             </div>
@@ -103,6 +101,9 @@ content %}
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">Add Member</h4>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
         </div>
         <div class="modal-body">
           <form action="{{url_for('add_member')}}" method="POST">
@@ -133,13 +134,8 @@ content %}
                 required="1"
               />
             </div>
-            <div class="form-group">
-              <button class="btn btn-primary" type="submit">Add</button>
-            </div>
             <div class="modal-footer">
-              <button class="btn btn-secondary" data-dismiss="modal">
-                Close
-              </button>
+              <button class="btn btn-primary" type="submit">Add</button>
             </div>
           </form>
         </div>
