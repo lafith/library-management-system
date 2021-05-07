@@ -6,7 +6,7 @@ from app.models import Member, Transaction
 
 import math
 import requests
-
+from collections import OrderedDict
 
 def register_librarian(name, email, password):
     """Add new librarian account info into Register table
@@ -178,9 +178,13 @@ def delete_member_db(id):
         Id of the member to be removed
     """
     member = Member.query.get(id)
-    db.session.delete(member)
-    db.session.commit()
-
+    transactions = member.transactions
+    if transactions is None:
+        db.session.delete(member)
+        db.session.commit()
+        flash("Member Deleted Successfully", 'success')
+    else:
+        flash("Member has not returned books", 'danger')
 
 def add_book_db(
         title, isbn, total, authors):
@@ -254,10 +258,11 @@ def delete_book_db(book_id):
     """
     book = Book.query.get(book_id)
     if Transaction.query.filter_by(book_id=book_id).count() != 0:
-        flash('Cannot Delete, Alread issued copies', 'danger')
+        flash('Cannot Delete, copies have been issued', 'danger')
     else:
         db.session.delete(book)
         db.session.commit()
+        flash("Book info Deleted Successfully", 'danger')
 
 
 def add_transaction(book_id, member_name):
@@ -271,30 +276,14 @@ def add_transaction(book_id, member_name):
         Name of the member to whom book is getting issued
     """
     book = Book.query.get(book_id)
-    if book.available == 0:
-        flash('No copies available to issue', 'danger')
-    else:
-        member = Member.query.filter_by(name=member_name).first()
-        if member is None:
-            flash('This member doesnt exist', 'danger')
-        else:
-            transactions = member.transactions
-            return_column = transactions.with_entities(Transaction.if_returned)
-            not_returned = return_column.filter_by(if_returned=False).count()
-            debt = app.config['RENT_FEE'] * not_returned
-            if debt <= app.config['DEBT_LIMIT']:
-                transaction = Transaction(
-                    member_id=member.member_id,
-                    book_id=book_id,
-                    )
-                book.available = book.available - 1
-                db.session.add(transaction)
-                db.session.commit()
-                flash('Book issued successfully!', 'success')
-            else:
-                flash(
-                    'Debt has crossed the limit! Cannot issue more',
-                    'danger')
+    member = Member.query.filter_by(name=member_name).first()
+    transaction = Transaction(
+        member_id=member.member_id,
+        book_id=book_id)
+    book.available = book.available - 1
+    db.session.add(transaction)
+    db.session.commit()
+    flash('Book issued successfully!', 'success')
 
 
 def update_transaction(book_id, member_name):
@@ -309,24 +298,14 @@ def update_transaction(book_id, member_name):
     """
     book = Book.query.get(book_id)
     member = Member.query.filter_by(name=member_name).first()
-    if member is None:
-        flash('This member doesnt exist', 'danger')
-    else:
-        if book.available == book.total:
-            flash(' Error! available is same as total stock', 'danger')
-        else:
-            transaction = member.transactions.filter_by(
-                member_id=member.member_id,
-                book_id=book_id, if_returned=False).first()
-            if transaction is not None:
-                print('hurrayyy')
-                transaction.if_returned = True
-                book.available = book.available + 1
-                db.session.commit()
-                flash('Return Confirmed', 'success')
-            else:
-                flash('Not issued to this member', 'danger')
-
+    transaction = member.transactions.filter_by(
+        member_id=member.member_id,
+        book_id=book_id, if_returned=False).first()
+    transaction.if_returned = True
+    book.available = book.available + 1
+    db.session.commit()
+    flash('Return Confirmed', 'success')
+    
 
 def fetch_frappe(
         url, params, required):
@@ -411,3 +390,23 @@ def single_request(url, params):
         print('Success!')
         data = response.json()
         return data['message']
+
+
+def populate_memberlist(mode, book_id=None):
+    members = Member.query.all()
+    eligible =[]
+    if mode == "issue":
+        for member in members:
+            transactions = member.transactions
+            return_column = transactions.with_entities(Transaction.if_returned)
+            not_returned = return_column.filter_by(if_returned=False).count()
+            debt = app.config['RENT_FEE'] * not_returned
+            if debt <= app.config['DEBT_LIMIT']:
+                eligible.append(member)
+    elif mode == "return":
+        book = Book.query.get(book_id)
+        transactions = book.transactions.filter_by(if_returned=False).all()
+        for transaction in transactions:
+            eligible.append(transaction.member)
+        eligible = list(OrderedDict.fromkeys(eligible))
+    return eligible

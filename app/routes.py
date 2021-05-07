@@ -13,7 +13,7 @@ from app.api import register_librarian, get_allbooks, search_books
 from app.api import get_members, add_member_db, update_member_db
 from app.api import add_book_db, update_book_db, delete_book_db
 from app.api import add_transaction, update_transaction
-from app.api import fetch_frappe, delete_member_db
+from app.api import fetch_frappe, delete_member_db, populate_memberlist
 
 
 @app.route('/')
@@ -95,7 +95,6 @@ def dashboard():
     if request.method == "POST":
         search_string = request.form["search"]
         search_by = request.form.get("searchby")
-
         books_paginated = search_books(search_by, search_string, books)
 
     return render_template('dashboard.html', books=books_paginated)
@@ -162,7 +161,6 @@ def update_member():
 def delete_member(id):
     """View function to remove entries from Member table"""
     delete_member_db(id)
-    flash("Member Deleted Successfully", 'danger')
     return redirect(url_for('members'))
 
 
@@ -203,32 +201,43 @@ def update_book():
 def delete_book(id):
     """View function to remove entries from Member table"""
     delete_book_db(id)
-
-    flash("Book info Deleted Successfully", 'danger')
     return redirect(url_for('dashboard'))
 
 
-@app.route('/issue_book', methods=['GET', 'POST'])
+@app.route('/issue_book/<id>', methods=['GET', 'POST'])
 @is_logged_in
-def issue_book():
+def issue_book(id):
     """View function to issue a book"""
     if request.method == 'POST':
-        member_name = request.form['member']
-        book_id = request.form.get('book_id')
-        add_transaction(book_id, member_name)
+        member_name = request.form.get("member_name")
+        add_transaction(id, member_name)
         return redirect(url_for('dashboard'))
 
+    book = Book.query.get(id)
+    if book.available == 0:
+        flash('No copies available to issue', 'danger')
+        return redirect(url_for('dashboard'))
+    else:
+        members = populate_memberlist(mode='issue')
+        return render_template('issue_book.html', id=id, members=members)
 
-@app.route('/return_book', methods=['GET', 'POST'])
+
+@app.route('/return_book/<id>', methods=['GET', 'POST'])
 @is_logged_in
-def return_book():
+def return_book(id):
     """View function to return a book"""
     if request.method == 'POST':
-        member_name = request.form['member']
-        book_id = request.form.get('book_id')
-        update_transaction(book_id, member_name)
-
+        member_name = request.form.get("member_name")
+        update_transaction(id, member_name)
         return redirect(url_for('dashboard'))
+    
+    book = Book.query.get(id)
+    if book.available == book.total:
+        flash(' Error! available is same as total stock', 'danger')
+        return redirect(url_for('dashboard'))
+    else:
+        members = populate_memberlist(mode='return',book_id=id)
+        return render_template('return_book.html', id=id, members=members)
 
 
 @app.route('/import_books', methods=['GET', 'POST'])

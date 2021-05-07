@@ -1,0 +1,30 @@
+{% extends "layout.html" %} {% block title %}Return Book{% endblock %} {% block
+content %}
+<div class="row justify-content-center align-items-center h-100">
+  <div class="col col-sm-6 col-md-6 col-lg-4 col-xl-3">
+    <div class="jumbotron p-3" style="background-color: #ffffff">
+      <h2>Return <b>Book</b></h2>
+      <form action="" method="POST">
+        <div class="form-group">
+          <select
+            class="form-control member_select"
+            name="member_name"
+            data-live-search="true"
+            title="Select member:"
+          >
+            {% for member in members%}
+            <option>{{member.name}}</option>
+            {%endfor%}
+          </select>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $(".member_select").selectpicker();
+  });
+</script>
+{% endblock %}
