@@ -219,7 +219,8 @@ def issue_book(id):
         return redirect(url_for('dashboard'))
     else:
         members = populate_memberlist(mode='issue')
-        return render_template('issue_book.html', id=id, members=members)
+        
+        return render_template('issue_book.html', id=id, members=members, book=book)
 
 
 @app.route('/return_book/<id>', methods=['GET', 'POST'])
@@ -237,7 +238,7 @@ def return_book(id):
         return redirect(url_for('dashboard'))
     else:
         members = populate_memberlist(mode='return',book_id=id)
-        return render_template('return_book.html', id=id, members=members)
+        return render_template('return_book.html', id=id, members=members, book=book)
 
 
 @app.route('/import_books', methods=['GET', 'POST'])

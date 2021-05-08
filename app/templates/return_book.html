@@ -1,24 +1,54 @@
 {% extends "layout.html" %} {% block title %}Return Book{% endblock %} {% block
 content %}
-<div class="row justify-content-center align-items-center h-100">
-  <div class="col col-sm-6 col-md-6 col-lg-4 col-xl-3">
-    <div class="jumbotron p-3" style="background-color: #ffffff">
-      <h2>Return <b>Book</b></h2>
-      <form action="" method="POST">
-        <div class="form-group">
-          <select
-            class="form-control member_select"
-            name="member_name"
-            data-live-search="true"
-            title="Select member:"
-          >
-            {% for member in members%}
-            <option>{{member.name}}</option>
-            {%endfor%}
-          </select>
+<div class="main-container container">
+  <div class="row">
+    <div class="col-sm-6 mx-auto">
+      <div class="card text-center box-shadow">
+        <div class="card-header">
+          <h4 class="my-0 font-weight-normal">Return Book</h4>
         </div>
-        <button class="btn btn-primary" type="submit">Submit</button>
-      </form>
+        <div class="card-body">
+          <h1 class="card-title pricing-card-title">
+            <small class="text-muted">Book details:</small>
+          </h1>
+          <table class="table table-hover table-bordered table-striped">
+            <tr>
+              <th>Title</th>
+              <td>{{book.title}}</td>
+            </tr>
+            <tr>
+              <th>ISBN</th>
+              <td>{{book.isbn}}</td>
+            </tr>
+            <tr>
+              <th>Authors</th>
+              <td>
+                {% for author in book.authors%} {{author.name}},{%endfor%}
+              </td>
+            </tr>
+          </table>
+          <form action="" method="POST">
+            <div class="form-group">
+              <select
+                class="form-control member_select"
+                name="member_name"
+                data-live-search="true"
+                title="Select member:"
+              >
+                {% for member in members%}
+                <option>{{member.name}}</option>
+                {%endfor%}
+              </select>
+            </div>
+            <button
+              type="submit"
+              class="btn btn-lg btn-block btn-outline-primary"
+            >
+              Confirm
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </div>

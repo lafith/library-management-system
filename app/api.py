@@ -393,6 +393,20 @@ def single_request(url, params):
 
 
 def populate_memberlist(mode, book_id=None):
+    """[summary]
+
+    Parameters
+    ----------
+    mode : str
+        Issue or Return
+    book_id : str, optional
+        Id of the selected book, by default None
+
+    Returns
+    -------
+    list
+        list eligible members
+    """
     members = Member.query.all()
     eligible =[]
     if mode == "issue":
