@@ -95,8 +95,10 @@ def dashboard():
     if request.method == "POST":
         search_string = request.form["search"]
         search_by = request.form.get("searchby")
-        books_paginated = search_books(search_by, search_string, books)
-
+        books_paginated = search_books(search_by, search_string, books)   
+        if books_paginated is None:
+            flash('No results found', 'danger')
+            return redirect(url_for('dashboard'))
     return render_template('dashboard.html', books=books_paginated)
 
 

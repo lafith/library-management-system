@@ -81,11 +81,14 @@ def searchby_title(title, all_books):
         Info of books with title containing [title]
     """
     books = all_books.filter(Book.title.like("%{}%".format(title)))
-    page = 1
-    books = books.order_by(
-        Book.registered_date.desc()).paginate(
-            page=page, per_page=app.config['PER_PAGE_COUNT'])
-    return books
+    if books.count() >1:
+        page = 1
+        books = books.order_by(
+            Book.registered_date.desc()).paginate(
+                page=page, per_page=app.config['PER_PAGE_COUNT'])
+        return books
+    else:
+        return None
 
 
 def searchby_author(author, all_books):
@@ -106,17 +109,19 @@ def searchby_author(author, all_books):
     authors = Author.query.filter(
         Author.name.like(
             "%{}%".format(author))).all()
-    books = authors[0].books
+    if len(authors)>1:
+        books = authors[0].books
 
-    for author in authors[1:]:
-        books.append(author.books)
-    page = 1
-    books = books.order_by(
-        Book.registered_date.desc()).paginate(
-            page=page,
-            per_page=app.config['PER_PAGE_COUNT'])
-    return books
-
+        for author in authors[1:]:
+            books.append(author.books)
+        page = 1
+        books = books.order_by(
+            Book.registered_date.desc()).paginate(
+                page=page,
+                per_page=app.config['PER_PAGE_COUNT'])
+        return books
+    else:
+        return None
 
 def get_members():
     """Fetch all member information
